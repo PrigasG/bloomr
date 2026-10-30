@@ -1,9 +1,9 @@
 #' Create an interactive hierarchical Bloom map
 #'
-#' A light-first, self-contained widget with parent-origin dots, curved dotted
-#' connectors, animated county and local-area blooms, dragging, and selection.
-#' New Jersey and Texas are bundled; no external geography service is required.
-#' Direct geography rendering is available without supplying data.
+#' Spread geographic areas apart while keeping their original locations visible.
+#' Dots and dotted connector lines link each expanded area back to its parent map.
+#' Includes ready-to-use New Jersey and Texas geography and accepts numeric
+#' indicator data. Works in R, Shiny, and HTML reports.
 #'
 #' @param geography Either `"nj"` or `"tx"` (case-insensitive).
 #' @param data Optional data frame with geographic identifiers and measured values.

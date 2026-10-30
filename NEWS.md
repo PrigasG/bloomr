@@ -1,10 +1,10 @@
-# bloomr 0.1.0 (release candidate)
+# bloomr 0.1.0
 
-* Built a light-first HTML widget for NJ and TX geographic blooms, without the lab interface.
-* Preserved original-position dots and dotted connector lines by default.
-* Smoothed local-to-county returns by animating camera, geographic lines, and county visibility together.
-* Restored the previous county zoom after returning from local areas.
-* Corrected Reset after local navigation so county interactions work immediately.
-* Added simple keyboard navigation (arrows, Enter/Space, Home/End, Escape) and reduced-motion behavior.
-* Added a short README, three vignettes, and practical Shiny examples.
-* Kept all map assets local, and kept styles isolated from host dashboards.
+- Explore counties and local areas using bundled New Jersey and Texas maps.
+- See original-location dots, dotted connectors, and parent boundaries by default.
+- Use smooth bloom, drag, return, and zoom interactions.
+- Choose which geographic labels and boundary lines to display.
+- Add numeric data, use the map in Shiny, and update values without resetting positions.
+- Switch between light and dark themes, with light mode as the default.
+- Navigate and select regions using the keyboard, with reduced-motion support.
+- Learn the basics through the README, three guides, and runnable examples.

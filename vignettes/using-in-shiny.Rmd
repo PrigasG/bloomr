@@ -7,10 +7,9 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-## Embed a map
+## Add a map
 
-Place `bloomOutput()` in your UI and `renderBloom()` in the server. Nothing
-needs to be added to the page's CSS or JavaScript.
+Place `bloomOutput()` in your UI and `renderBloom()` in your server. No separate CSS or JavaScript is needed.
 
 ```{r, eval=FALSE}
 library(shiny)
@@ -20,24 +19,24 @@ ui <- fluidPage(
   bloomOutput("map", height = "520px"),
   textOutput("chosen")
 )
+
 server <- function(input, output, session) {
-  output$map <- renderBloom({ bloom_map("nj") })
+  output$map <- renderBloom({ bloom_map() })
+
   output$chosen <- renderText({
     req(input$map_selected)
     paste(input$map_selected$name, input$map_selected$level)
   })
 }
+
 shinyApp(ui, server)
 ```
 
-`input$map_selected` includes `id`, `geoid`, `name`, `level`, and `parent_id`.
-Use these values to filter tables or update other charts. The input name uses
-the map's output ID, so two maps can have separate selections.
+When someone selects a region, `input$map_selected` gives its `id`, `geoid`, `name`, `level`, and `parent_id`. Use these values to filter another output. Different map IDs keep their selections separate.
 
-## Update values without resetting the map
+## Update the colors without moving the map
 
-Create the widget once. When users change an indicator, update *only the
-values* with a proxy. This keeps positions and animation state intact.
+Use a proxy when an indicator changes. This updates the values without resetting the current view or dragged positions.
 
 ```{r, eval=FALSE}
 observeEvent(input$metric, {
@@ -50,14 +49,9 @@ observeEvent(input$metric, {
 }, ignoreInit = TRUE)
 ```
 
-`county_data` should have a character `geoid` column and numeric indicator
-columns. The demo app supplies data and a working indicator selector:
+Here `county_data` is a data frame with a character `geoid` column and numeric indicator columns. Put the code inside the Shiny server and provide a `metric` input.
 
-```{r, eval=FALSE}
-bloomr::run_bloom_example()
-```
-
-## Control the map from Shiny
+## Select or expand a region from Shiny
 
 ```{r, eval=FALSE}
 bloom_select(bloomProxy("map"), "bergen")
@@ -65,19 +59,14 @@ bloom_expand(bloomProxy("map"), "county")
 bloom_reset(bloomProxy("map"))
 ```
 
-Select a county first, then use `bloom_expand(..., "local")` to open it.
-Commands run on the existing widget; do not re-render the widget for a change
-in selection or indicators.
+To open smaller areas, first select a county, then use `bloom_expand(bloomProxy("map"), "local")`. Proxies act on the displayed map instead of creating a new one.
 
-## Helpful integration notes
+## Try the complete example
 
-- The map is light by default and has styles scoped to its own container.
-- Overview county boundaries and local municipality boundaries are visible
-  by default; **Display** turns either off without resetting the map.
-- Labels are off by default. Pass `labels = "selected"` or
-  `labels = "custom", label_areas = c("bergen")` when needed.
-- It can sit inside a dashboard card, a sidebar layout, or a Shiny tab.
-- Give it an explicit height such as `height = "520px"`.
-- No network access is needed for the bundled map data.
-- `bloom_check_data()` checks columns, unique IDs, and missing values; it does
-  not verify that every supplied ID matches a prepared boundary.
+```{r, eval=FALSE}
+run_bloom_example()
+```
+
+The example includes an indicator selector, geographic selection feedback, and live map updates. The map fits dashboard cards and Shiny tabs; set a height such as `"520px"` to give it enough room.
+
+For labels, colors, boundary lines, and keyboard controls, see [Appearance and keyboard](appearance-and-keyboard.html).

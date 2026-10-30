@@ -1,9 +1,21 @@
-Prepared browser data for Hierarchical Bloom Lab.
+# Included geography
 
-- `nj_counties.geojson`: five-decimal authoritative county display geometry
-- `nj_state.geojson`: state outline synchronized from the finalized county union
-- `boundaries/index.json`: lightweight county names, identifiers, metrics, and static asset URLs
-- `municipalities/index.json`: lightweight county index and statewide metric summary
-- `municipalities/<county>.geojson`: municipality geometry loaded only when that county is opened
+`bloomr` includes prepared geographic files for its New Jersey and Texas maps. The browser loads local-area files only when a county is opened.
 
-Build-only full-resolution sources are intentionally excluded from the runtime distribution. `scripts/prepare_data_once.R` can refresh these caches from the official NJGIS services, or from an optional local `data_source/` folder created by the developer.
+## New Jersey
+
+- `nj_state.geojson`: state outline.
+- `nj_counties.geojson`: county polygons and geographic IDs.
+- `boundaries/index.json`: county lookup information and asset paths.
+- `municipalities/index.json`: local-area lookup information.
+- `municipalities/*.geojson`: municipality polygons, one county per file.
+
+## Texas
+
+- `tx/state.geojson`: state outline.
+- `tx/counties.geojson`: county polygons and geographic IDs.
+- `tx/boundaries/index.json`: county lookup information.
+- `tx/municipalities/index.json`: local-area lookup information.
+- `tx/municipalities/*.geojson`: census county subdivision polygons, one county per file.
+
+Map data is bundled with the package. Users do not need to download boundaries or connect to an external mapping service for these examples. These prepared geometries are for visualization and should not be used to determine legal boundaries.

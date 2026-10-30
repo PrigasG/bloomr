@@ -1,7 +1,7 @@
 library(shiny)
 library(bloomr)
 
-# Demonstrates geography, embedding, external selection, and reactive colors.
+# Example data from the included county boundaries.
 raw <- jsonlite::fromJSON(system.file(
   "htmlwidgets", "lib", "bloomr-geo", "data", "nj_counties.geojson",
   package = "bloomr"
@@ -18,7 +18,7 @@ ui <- fluidPage(
   fluidRow(
     column(3,
       selectInput("measure", "Indicator", c("Population" = "population", "Density" = "density")),
-      helpText("Select a county to send its data to Shiny. Use Display on the map for boundary lines and labels. Map positions stay put when values change."),
+      helpText("Select a county to see its details. Choose Display on the map to change labels or boundary lines."),
       verbatimTextOutput("selected")
     ),
     column(9, bloomOutput("map", height = "550px"))

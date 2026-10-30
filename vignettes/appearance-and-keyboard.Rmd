@@ -7,78 +7,59 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-## Keep the defaults
-
-The standard map has a light background, origin dots, and dotted curved
-connectors. The dots show where a shape came from inside its parent geography.
-The lines move with the expanded shapes. Fixed outlines of the original
-counties remain visible on the state map; local outlines remain visible inside
-a selected county. No options are required:
+## Start with the defaults
 
 ```{r, eval=FALSE}
-bloom_map("nj")
+library(bloomr)
+bloom_map()
 ```
 
-## Change only what you need
+The map uses a light theme and displays original-location dots, dotted connectors, and the original geographic boundaries. Area names appear on hover. Labels are hidden by default to avoid clutter.
+
+## Change the theme or animation
 
 ```{r, eval=FALSE}
-bloom_map("nj", theme = "dark")
-bloom_map("nj", preset = "viewer")   # hides the SVG export button
-bloom_map("nj", duration = 350)      # motion time in milliseconds
-bloom_map("nj", draggable = FALSE)  # selection without dragging
+bloom_map(theme = "dark")
+bloom_map(theme = "auto")
+bloom_map(duration = 350)
+bloom_map(draggable = FALSE)
 ```
 
-Dots and connectors can be hidden with `dots = FALSE` or
-`connectors = FALSE`, but both are enabled by default.
+`theme = "auto"` follows the browser's color preference. Light mode remains the default. Use `dots = FALSE` or `connectors = FALSE` to hide the corresponding geographic guides.
 
-## Boundaries and map labels
+## Show or hide boundaries
 
-Press **Display** in the map toolbar. The controls use two clear names:
+The map's **Display** menu contains two separate controls:
 
-- **Overview: county lines** shows the original county outlines in the state.
-- **Local: municipality/subdivision lines** shows outlines inside a county.
+- **Overview: county lines** shows the county outlines inside the original state map.
+- **Local: municipality/subdivision lines** shows the outlines inside the selected county.
 
-Both are on by default. To turn one off when creating the map:
+Both are on by default. To turn them off in R:
 
 ```{r, eval=FALSE}
-bloom_map("nj", overview_boundaries = FALSE)
-bloom_map("nj", local_boundaries = FALSE)
+bloom_map(overview_boundaries = FALSE)
+bloom_map(local_boundaries = FALSE)
 ```
 
-Area names appear in tooltips even when map labels are off. Labels are off
-by default to keep busy maps clear. Use `labels = "selected"` for just the
-selected area, `labels = "all"` for automatically spaced labels, or choose a
-small set of area IDs:
+## Show a few labels
 
 ```{r, eval=FALSE}
-bloom_map("nj", labels = "selected")
-bloom_map("nj", labels = "custom", label_areas = c("bergen", "essex"))
+bloom_map(labels = "selected")
+bloom_map(labels = "all")
+bloom_map(labels = "custom", label_areas = c("bergen", "essex"))
 ```
 
-When using the map, Shift+click a region to pin or unpin its label. You can
-also focus a region and press **L**. This switches to **Chosen areas** mode.
-The label follows its shape when you drag. In **All** mode, overlapping
-labels are hidden to limit clutter.
+Use `"selected"` for the selected area, `"all"` for labels with basic overlap filtering, or `"custom"` to label particular IDs. Tooltips remain available in every mode. Shift+click an area, or focus it and press **L**, to add or remove its label.
 
+## Keyboard controls
 
-`theme = "auto"` follows the browser's dark-mode preference. `theme = "light"`
-is the default even when the containing dashboard uses other styles.
+| Key | Action |
+| --- | --- |
+| Tab | Reach the toolbar and active map areas |
+| Arrow keys | Move focus between areas |
+| Home / End | Go to the first or last area |
+| Enter / Space | Select the focused area |
+| L | Show or hide the focused area's label |
+| Escape | Close Display or return to the previous level |
 
-## Keyboard basics
-
-- **Tab** to enter the toolbar and active geography.
-- **Left / Right / Up / Down** to move focus between counties or local areas.
-- **Home / End** to jump to the first or last visible area.
-- **Enter / Space** to select the focused shape.
-- **L** to show or hide a label for the focused area.
-- **Escape** to close the Display panel or return one geographic level.
-
-The toolbar supports Tab, Enter and Space as normal browser buttons. People
-who prefer reduced motion get immediate transitions. Nothing registers global
-keyboard shortcuts that could interfere with the dashboard.
-
-## What is not included yet
-
-No custom maps, keyboard dragging, full lab history, or advanced editor are
-included in 0.1.0. Keyboard navigation and selection are supported, but a
-formal screen-reader audit remains a release follow-up.
+The widget also respects the browser's reduced-motion preference. Keyboard navigation supports selecting regions; moving shapes by keyboard is not available.

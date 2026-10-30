@@ -1,4 +1,4 @@
-# Two independent maps in one Shiny dashboard
+# Two independent maps in a Shiny app.
 library(shiny)
 library(bloomr)
 
@@ -8,8 +8,10 @@ ui <- fluidPage(
     column(6, bloomOutput("tx", height = "440px"))
   )
 )
+
 server <- function(input, output, session) {
   output$nj <- renderBloom({ bloom_map("nj") })
   output$tx <- renderBloom({ bloom_map("tx", theme = "dark") })
 }
+
 shinyApp(ui, server)

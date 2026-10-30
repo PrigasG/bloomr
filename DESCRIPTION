@@ -3,12 +3,11 @@ Title: Interactive Hierarchical Geographic Bloom Maps
 Version: 0.1.0
 Authors@R: person("George", "Arthur", , "prigasgenthian48@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1975-1459"))
-Description: Embeds interactive geographic bloom maps in Shiny applications and
-    HTML reports. Regions expand from their geographic origins while origin dots
-    and dotted connector lines preserve the relationship to the parent geography.
-    Includes prepared New Jersey and Texas boundaries with lazy local-area loading.
-    The package ships a self-contained JavaScript visualization engine with
-    light-first styling and supports selections, dragging, and reactive updates.
+Description: Creates interactive maps that spread geographic areas apart while
+    preserving their original locations with dots and dotted connector lines.
+    Includes prepared New Jersey and Texas geography, with local areas loaded
+    on demand. Supports numeric data, selection, dragging, and updates in Shiny
+    apps and HTML reports. Uses light styling by default with an optional dark theme.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 4.1.0)

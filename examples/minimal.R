@@ -1,11 +1,10 @@
-# Run after installing bloomr.
+# Start with the default map.
 library(bloomr)
 
-# With no indicator data, this displays the original county geometry.
-bloom_map("nj")
+bloom_map()
 
-# Light mode is the default. Parent origin dots and dotted connectors are on.
-bloom_map("tx", theme = "dark", duration = 470)
+# Try the Texas map with a dark theme.
+bloom_map("tx", theme = "dark")
 
-# Full Shiny example:
-run_bloom_example()
+# To open the complete Shiny example, run:
+# run_bloom_example()

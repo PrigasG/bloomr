@@ -1,55 +1,51 @@
-# Testing and validation
+# Testing bloomr
 
-## Can be run without R
+This guide is for package maintainers and contributors. The [README](../README.md) covers installation and everyday use.
 
-From the package source folder:
+## R package checks
+
+From the directory containing the `bloomr` package folder:
+
+```sh
+R CMD build bloomr
+R CMD check --as-cran bloomr_0.1.0.tar.gz
+```
+
+In R, also run:
+
+```r
+testthat::test_local("bloomr")
+library(bloomr)
+bloom_map()
+run_bloom_example()
+```
+
+Install the package before running the example. Check that all three vignettes build and that the Shiny app works with selections and indicator updates.
+
+## JavaScript and geography checks
+
+Run from the package root:
 
 ```sh
 node --check inst/htmlwidgets/lib/bloomr/bloom-core.js
 node tests/browser/check-assets.js
-```
-
-A browser test fixture is included. Serve the source directory on localhost
-and open `tests/browser/fixture.html`; the test uses the actual bundled NJ
-GeoJSON and the package browser engine.
-
-The included Playwright smoke script uses real bundled NJ/TX geometry inline:
-
-```sh
 python tests/browser/run_browser_smoke.py
+python tests/browser/test_transitions.py
+python tests/browser/test_boundaries_labels.py
+python tests/browser/test_svg_export.py
 ```
 
-Observed build results: New Jersey (21 counties and Bergen's 70 municipalities),
-Texas (254 counties and Anderson's subdivisions), active dotted connectors,
-value updates retaining manual offsets, local back navigation, two simultaneous
-map instances, and isolated light/dark styling all passed browser smoke tests.
-The included screenshot shows the county-bloom default appearance.
+The Python browser tests require Playwright and Chromium. They use bundled New Jersey and Texas geography.
 
-## R environment checks (required before release)
+## Check the user experience
 
-```r
-install.packages(c("htmlwidgets", "htmltools", "jsonlite", "shiny", "testthat"))
-install.packages(".", repos = NULL, type = "source")
-library(bloomr)
-bloom_map("nj")
-bloomr::run_bloom_example()
-testthat::test_dir("tests/testthat")
-# From the source project, with an installed R toolchain:
-# R CMD check --as-cran .
-```
+- Expand and collapse both geographic levels; verify smooth return transitions.
+- Drag an area and check that its origin dot and dotted connector stay aligned.
+- Show and hide overview and local boundary lines independently.
+- Try no labels, selected labels, and chosen labels.
+- Change values through a Shiny proxy without moving the geography.
+- Render two maps on one page and check that they stay independent.
+- Test light and dark themes, narrow screens, hidden Shiny tabs, keyboard selection, and reduced motion.
+- Publish an HTML report with its dependency folder and confirm that the map loads.
 
-## Recommended manual Shiny checklist
-
-- New Jersey initial silhouette, county bloom, local bloom (Bergen), drag,
-  dotted connector tracking and collapse.
-- Texas 254-county bloom performance and 2 local-area subdivisions.
-- Dark and light themes embedded in light and dark dashboard cards.
-- Two map instances on a single page, different selected counties.
-- Data-only Shiny updates preserve geographic offsets.
-- Keyboard selection, reduced motion and small viewport/touch interactions.
-- Single-file HTML publishing: confirm all geography files are copied with the
-  widget dependency and no external network is requested.
-
-Limitations of initial validation: the build environment has no R executable,
-so R installation, R CMD check, Quarto, and a Shiny runtime have not been run.
-Do not treat JavaScript/browser checks as substitutes for those release gates.
+The browser tests do not replace an R package check. Confirm boundary-data provenance and redistribution permissions as part of publication review.

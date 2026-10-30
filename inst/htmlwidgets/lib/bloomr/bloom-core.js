@@ -1,6 +1,5 @@
-/* bloomr 0.1.0: independently scoped, light-first geographic bloom widget.
-   Source design adapted from Hierarchical Bloom Lab v17.5.12, whose full
-   laboratory application remains unchanged. No global page styles or CDN. */
+/* bloomr: geographic bloom map engine.
+   Each map has its own state, events, and styles. Assets are bundled locally. */
 (function (global) {
   "use strict";
   const NS = "http://www.w3.org/2000/svg";
@@ -27,7 +26,7 @@
     const hex = i => Math.round(parseInt(a.slice(i, i + 2), 16) * (1 - t) + parseInt(b.slice(i, i + 2), 16) * t).toString(16).padStart(2, "0");
     return `#${hex(0)}${hex(2)}${hex(4)}`;
   };
-  // Mercator with the same resting-area rule as the v17.5.12 laboratory map.
+  // Mercator projection with a consistent geographic resting area.
   const merc = xy => {
     const lon = Number(xy[0]) * Math.PI / 180;
     const lat = clamp(Number(xy[1]), -85, 85) * Math.PI / 180;
@@ -111,8 +110,7 @@
     name: "New Jersey", countyLabel: "counties", localLabel: "municipalities", root: "", state: "nj_state.geojson", counties: "nj_counties.geojson"
   };
 
-  // Intentionally retain the laboratory's geographic collision algorithm.
-  // The function body below is sourced from Bloom Lab v17.5.12, and its
+  // Use the deterministic geographic collision algorithm. Its
   // deterministic layout decisions are not substituted with random forces.
   function computeGeographicExpansion(features, parentCentroid, options) {
     if (!Array.isArray(features) || !features.length) return;
@@ -329,7 +327,7 @@
       this.displayButton.setAttribute("aria-expanded", "false");
       this.displayButton.setAttribute("aria-controls", this.id + "-display");
       if (this.config.preset !== "viewer") button("Export visible map as SVG", "SVG", () => this.exportSvg());
-      // An optional, compact panel; no full laboratory settings rail.
+      // Compact display controls.
       this.displayPanel = html("div", "bloomr-display-panel", this.shell);
       this.displayPanel.id = this.id + "-display";
       this.displayPanel.hidden = true;
