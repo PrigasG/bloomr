@@ -1,0 +1,10 @@
+dependencies:
+  - name: bloomr-geography
+    version: 0.1.0
+    src: htmlwidgets/lib/bloomr-geo
+    script: geography-assets.js
+  - name: bloomr-engine
+    version: 0.1.0
+    src: htmlwidgets/lib/bloomr
+    script: bloom-core.js
+    stylesheet: bloom.css

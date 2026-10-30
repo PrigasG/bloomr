@@ -1,0 +1,84 @@
+---
+title: "Appearance and keyboard controls"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Appearance and keyboard controls}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Keep the defaults
+
+The standard map has a light background, origin dots, and dotted curved
+connectors. The dots show where a shape came from inside its parent geography.
+The lines move with the expanded shapes. Fixed outlines of the original
+counties remain visible on the state map; local outlines remain visible inside
+a selected county. No options are required:
+
+```{r, eval=FALSE}
+bloom_map("nj")
+```
+
+## Change only what you need
+
+```{r, eval=FALSE}
+bloom_map("nj", theme = "dark")
+bloom_map("nj", preset = "viewer")   # hides the SVG export button
+bloom_map("nj", duration = 350)      # motion time in milliseconds
+bloom_map("nj", draggable = FALSE)  # selection without dragging
+```
+
+Dots and connectors can be hidden with `dots = FALSE` or
+`connectors = FALSE`, but both are enabled by default.
+
+## Boundaries and map labels
+
+Press **Display** in the map toolbar. The controls use two clear names:
+
+- **Overview: county lines** shows the original county outlines in the state.
+- **Local: municipality/subdivision lines** shows outlines inside a county.
+
+Both are on by default. To turn one off when creating the map:
+
+```{r, eval=FALSE}
+bloom_map("nj", overview_boundaries = FALSE)
+bloom_map("nj", local_boundaries = FALSE)
+```
+
+Area names appear in tooltips even when map labels are off. Labels are off
+by default to keep busy maps clear. Use `labels = "selected"` for just the
+selected area, `labels = "all"` for automatically spaced labels, or choose a
+small set of area IDs:
+
+```{r, eval=FALSE}
+bloom_map("nj", labels = "selected")
+bloom_map("nj", labels = "custom", label_areas = c("bergen", "essex"))
+```
+
+When using the map, Shift+click a region to pin or unpin its label. You can
+also focus a region and press **L**. This switches to **Chosen areas** mode.
+The label follows its shape when you drag. In **All** mode, overlapping
+labels are hidden to limit clutter.
+
+
+`theme = "auto"` follows the browser's dark-mode preference. `theme = "light"`
+is the default even when the containing dashboard uses other styles.
+
+## Keyboard basics
+
+- **Tab** to enter the toolbar and active geography.
+- **Left / Right / Up / Down** to move focus between counties or local areas.
+- **Home / End** to jump to the first or last visible area.
+- **Enter / Space** to select the focused shape.
+- **L** to show or hide a label for the focused area.
+- **Escape** to close the Display panel or return one geographic level.
+
+The toolbar supports Tab, Enter and Space as normal browser buttons. People
+who prefer reduced motion get immediate transitions. Nothing registers global
+keyboard shortcuts that could interfere with the dashboard.
+
+## What is not included yet
+
+No custom maps, keyboard dragging, full lab history, or advanced editor are
+included in 0.1.0. Keyboard navigation and selection are supported, but a
+formal screen-reader audit remains a release follow-up.

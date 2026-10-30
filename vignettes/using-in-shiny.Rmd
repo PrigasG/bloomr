@@ -1,0 +1,83 @@
+---
+title: "Use Bloom in a Shiny app"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Use Bloom in a Shiny app}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Embed a map
+
+Place `bloomOutput()` in your UI and `renderBloom()` in the server. Nothing
+needs to be added to the page's CSS or JavaScript.
+
+```{r, eval=FALSE}
+library(shiny)
+library(bloomr)
+
+ui <- fluidPage(
+  bloomOutput("map", height = "520px"),
+  textOutput("chosen")
+)
+server <- function(input, output, session) {
+  output$map <- renderBloom({ bloom_map("nj") })
+  output$chosen <- renderText({
+    req(input$map_selected)
+    paste(input$map_selected$name, input$map_selected$level)
+  })
+}
+shinyApp(ui, server)
+```
+
+`input$map_selected` includes `id`, `geoid`, `name`, `level`, and `parent_id`.
+Use these values to filter tables or update other charts. The input name uses
+the map's output ID, so two maps can have separate selections.
+
+## Update values without resetting the map
+
+Create the widget once. When users change an indicator, update *only the
+values* with a proxy. This keeps positions and animation state intact.
+
+```{r, eval=FALSE}
+observeEvent(input$metric, {
+  bloom_update_data(
+    bloomProxy("map"),
+    data = county_data,
+    key = "geoid",
+    value = input$metric
+  )
+}, ignoreInit = TRUE)
+```
+
+`county_data` should have a character `geoid` column and numeric indicator
+columns. The demo app supplies data and a working indicator selector:
+
+```{r, eval=FALSE}
+bloomr::run_bloom_example()
+```
+
+## Control the map from Shiny
+
+```{r, eval=FALSE}
+bloom_select(bloomProxy("map"), "bergen")
+bloom_expand(bloomProxy("map"), "county")
+bloom_reset(bloomProxy("map"))
+```
+
+Select a county first, then use `bloom_expand(..., "local")` to open it.
+Commands run on the existing widget; do not re-render the widget for a change
+in selection or indicators.
+
+## Helpful integration notes
+
+- The map is light by default and has styles scoped to its own container.
+- Overview county boundaries and local municipality boundaries are visible
+  by default; **Display** turns either off without resetting the map.
+- Labels are off by default. Pass `labels = "selected"` or
+  `labels = "custom", label_areas = c("bergen")` when needed.
+- It can sit inside a dashboard card, a sidebar layout, or a Shiny tab.
+- Give it an explicit height such as `height = "520px"`.
+- No network access is needed for the bundled map data.
+- `bloom_check_data()` checks columns, unique IDs, and missing values; it does
+  not verify that every supplied ID matches a prepared boundary.

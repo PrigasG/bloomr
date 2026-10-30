@@ -1,0 +1,63 @@
+---
+title: "Getting started with bloomr"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with bloomr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## One line to start
+
+```{r, eval=FALSE}
+library(bloomr)
+bloom_map("nj")
+```
+
+1. Select **Bloom counties** to expand New Jersey.
+2. Select a county, then choose **Bloom municipalities**.
+3. Drag an area if it overlaps another. Its dot remains at the original position.
+4. Select **Back** to return one level.
+
+The return to the county view animates both the map and the camera. The
+original county lines remain in the state map, and original municipality
+lines remain in the county. Both can be turned off with the **Display** button.
+Labels are off by default; hover for names. Dark mode is optional; light
+is the default.
+
+```{r, eval=FALSE}
+bloom_map("tx", theme = "dark")
+```
+
+## Color counties using your data
+
+```{r, eval=FALSE}
+rates <- data.frame(
+  geoid = c("34003", "34013", "34021"),
+  rate = c(12.5, 18.2, 9.3)
+)
+
+bloom_check_data(rates, value = "rate")
+bloom_map("nj", data = rates, key = "geoid", value = "rate")
+```
+
+GEOIDs must be character strings, including any leading zeros. Each ID appears
+once. Values must be numeric. Rows without a value appear in gray when the
+corresponding geography has data.
+
+## Where it works
+
+Use `bloom_map()` in the RStudio Viewer or an HTML report. For Shiny, use
+`bloomOutput()` and `renderBloom()`, explained in the
+[Shiny guide](using-in-shiny.html). Local data comes with the package, so it
+does not call an online geographic service at runtime.
+
+## Before using your own geography
+
+Version 0.1.0 ships prepared NJ and TX data. It does not yet read arbitrary
+`sf` or GeoJSON boundaries. You can add *numeric data* by geographic ID, but
+not replace the base geography.
+
+Standalone HTML output must include its widget dependency folder and be tested
+on its final hosting setup. Single-file self-contained HTML publishing is not
+yet verified.

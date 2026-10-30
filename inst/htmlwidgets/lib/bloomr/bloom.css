@@ -1,0 +1,171 @@
+/* All styling is scoped to the widget. Never change html/body or host themes. */
+.bloomr-widget {
+  --bloom-bg: #f6f8fb;
+  --bloom-surface: #ffffff;
+  --bloom-border: #dce3ec;
+  --bloom-text: #172436;
+  --bloom-muted: #556578;
+  --bloom-accent: #2c6fa8;
+  --bloom-selected: #e89a36;
+  --bloom-origin: #3971ac;
+  --bloom-connector: #5881a6;
+  box-sizing: border-box;
+  display: block;
+  color: var(--bloom-text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 13px;
+  min-width: 0;
+  background: var(--bloom-surface);
+  border: 1px solid var(--bloom-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.bloomr-widget[data-bloom-theme="dark"] {
+  --bloom-bg: #101b2b;
+  --bloom-surface: #172437;
+  --bloom-border: #34465e;
+  --bloom-text: #e7eef9;
+  --bloom-muted: #bcc8d9;
+  --bloom-accent: #93c5fd;
+  --bloom-selected: #f5b75e;
+  --bloom-origin: #a0c7f1;
+  --bloom-connector: #9ab7d3;
+}
+.bloomr-widget *, .bloomr-widget *::before, .bloomr-widget *::after { box-sizing: border-box; }
+.bloomr-widget .bloomr-shell { display: flex; flex-direction: column; height: 100%; min-height: 210px; }
+.bloomr-widget .bloomr-toolbar {
+  flex: 0 0 auto;
+  min-height: 49px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 7px 10px;
+  background: var(--bloom-surface);
+  border-bottom: 1px solid var(--bloom-border);
+}
+.bloomr-widget .bloomr-title { font-weight: 680; font-size: 13px; letter-spacing: .01em; white-space: nowrap; }
+.bloomr-widget .bloomr-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+.bloomr-widget .bloomr-button {
+  background: var(--bloom-bg);
+  border: 1px solid var(--bloom-border);
+  border-radius: 7px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 580;
+  color: var(--bloom-text);
+  line-height: 1.2;
+  padding: 6px 10px;
+  min-height: 29px;
+  min-width: 29px;
+  cursor: pointer;
+}
+.bloomr-widget .bloomr-button:hover { border-color: var(--bloom-accent); color: var(--bloom-accent); }
+
+/* Compact options are in normal document flow so they never cover the map. */
+.bloomr-widget .bloomr-display-panel {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 7px 16px;
+  padding: 9px 12px; background: var(--bloom-surface);
+  border-bottom: 1px solid var(--bloom-border);
+}
+.bloomr-widget .bloomr-display-option {
+  display: inline-flex; align-items: center; gap: 7px;
+  font: inherit; font-size: 12px; color: var(--bloom-text);
+  cursor: pointer; margin: 0;
+}
+.bloomr-widget .bloomr-display-option input {
+  margin: 0; accent-color: var(--bloom-accent);
+}
+.bloomr-widget .bloomr-label-select {
+  font: inherit; font-size: 12px; padding: 4px 7px;
+  color: var(--bloom-text); background: var(--bloom-bg);
+  border: 1px solid var(--bloom-border); border-radius: 6px;
+}
+.bloomr-widget .bloomr-display-help {
+  flex: 1 0 100%; margin: 0;
+  font-size: 11px; color: var(--bloom-muted);
+}
+.bloomr-widget .bloomr-display-option input:focus-visible,
+.bloomr-widget .bloomr-label-select:focus-visible {
+  outline: 2px solid var(--bloom-selected); outline-offset: 2px;
+}
+
+.bloomr-widget .bloomr-button:focus-visible,
+.bloomr-widget .bloomr-parent:focus-visible,
+.bloomr-widget .bloomr-county:focus-visible,
+.bloomr-widget .bloomr-local:focus-visible { outline: 2px solid var(--bloom-selected); outline-offset: 3px; }
+.bloomr-widget .bloomr-button:disabled { opacity: .5; cursor: wait; }
+.bloomr-widget [hidden] { display: none !important; }
+.bloomr-widget .bloomr-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  background: var(--bloom-bg);
+  overflow: hidden;
+}
+.bloomr-widget .bloomr-svg { display: block; width: 100%; height: 100%; min-height: 140px; overflow: hidden; }
+.bloomr-widget .bloomr-viewport { transform-origin: 0 0; }
+.bloomr-widget .bloomr-parent { fill: #d9e4ef; fill-opacity: .65; stroke: #6885a3; stroke-width: 2.2; stroke-linejoin: round; }
+.bloomr-widget[data-bloom-theme="dark"] .bloomr-parent { fill: #3b506d; stroke: #b0c4df; }
+.bloomr-widget .bloomr-county, .bloomr-widget .bloomr-local {
+  stroke: #456b92; stroke-width: 1.25; stroke-linejoin: round; vector-effect: non-scaling-stroke;
+  cursor: grab; touch-action: none;
+}
+.bloomr-widget .bloomr-local { stroke: #517ba6; stroke-width: 1.05; }
+.bloomr-widget .bloomr-county:active, .bloomr-widget .bloomr-local:active { cursor: grabbing; }
+.bloomr-widget .bloomr-selected { stroke: var(--bloom-selected); stroke-width: 3; filter: drop-shadow(0 0 2px rgba(0,0,0,.10)); }
+.bloomr-widget .bloomr-connector { fill: none; stroke: var(--bloom-connector); stroke-width: 1.75; stroke-linecap: round; stroke-dasharray: 2.5 5.5; pointer-events: none; }
+.bloomr-widget .bloomr-local-connector { stroke-width: 1.3; stroke-dasharray: 2 4; }
+.bloomr-widget .bloomr-origin-dot { fill: var(--bloom-origin); stroke: var(--bloom-surface); stroke-width: 1.75; pointer-events: none; }
+.bloomr-widget .bloomr-halo { paint-order: stroke; stroke-width: 3.3; }
+/* Fixed outlines show the original regional divisions before and after blooming. */
+.bloomr-widget .bloomr-overview-reference {
+  fill: none; stroke: #7f9ab7; stroke-width: .95;
+  opacity: .72; stroke-linejoin: round; pointer-events: none;
+  vector-effect: non-scaling-stroke;
+}
+.bloomr-widget[data-bloom-theme="dark"] .bloomr-overview-reference {
+  stroke: #9eb8d6; opacity: .72;
+}
+.bloomr-widget .bloomr-area-label {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 13px; font-weight: 650; fill: var(--bloom-text);
+  stroke: var(--bloom-bg); stroke-width: 3.2px;
+  paint-order: stroke; stroke-linejoin: round;
+  pointer-events: none; user-select: none;
+}
+.bloomr-widget .bloomr-local-reference { fill: none; stroke: #7d99ba; stroke-width: .9; opacity: .60; pointer-events: none; }
+.bloomr-widget .bloomr-tooltip {
+  position: absolute; z-index: 10; pointer-events: none;
+  max-width: 220px; background: var(--bloom-surface);
+  color: var(--bloom-text); border: 1px solid var(--bloom-border);
+  border-radius: 6px; padding: 6px 9px;
+  font-size: 12px; font-weight: 560;
+  box-shadow: 0 4px 18px rgba(23,36,54,.14);
+}
+.bloomr-widget .bloomr-legend { position: absolute; bottom: 10px; left: 12px; pointer-events: none; color: var(--bloom-muted); font-size: 11px; }
+.bloomr-widget .bloomr-legend:not(:empty) {
+  background: var(--bloom-surface); border: 1px solid var(--bloom-border);
+  border-radius: 7px; padding: 7px 9px; width: 155px;
+  box-shadow: 0 2px 9px rgba(23,36,54,.07);
+}
+.bloomr-widget .bloomr-legend-title { font-weight: 620; font-size: 10px; margin-bottom: 5px; }
+.bloomr-widget .bloomr-legend-ramp { height: 7px; border-radius: 4px; background: linear-gradient(to right,#BFDBFE,#155E75); }
+.bloomr-widget .bloomr-legend-range { display: flex; justify-content: space-between; margin-top: 3px; font-variant-numeric: tabular-nums; }
+.bloomr-widget .bloomr-status {
+  flex: 0 0 auto; min-height: 28px;
+  padding: 6px 12px; color: var(--bloom-muted);
+  background: var(--bloom-surface); border-top: 1px solid var(--bloom-border);
+  font-size: 11px; line-height: 1.35;
+}
+.bloomr-widget .bloomr-error { color: #b42318; }
+@media (max-width: 560px) {
+  .bloomr-widget .bloomr-toolbar { align-items: flex-start; }
+  .bloomr-widget .bloomr-title { width: 100%; }
+  .bloomr-widget .bloomr-actions { gap: 4px; }
+  .bloomr-widget .bloomr-button { padding: 6px 7px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bloomr-widget * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}

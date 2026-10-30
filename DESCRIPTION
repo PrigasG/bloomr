@@ -1,0 +1,27 @@
+Package: bloomr
+Title: Interactive Hierarchical Geographic Bloom Maps
+Version: 0.1.0
+Authors@R: person("George", "Arthur", , "prigasgenthian48@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-1975-1459"))
+Description: Embeds interactive geographic bloom maps in Shiny applications and
+    HTML reports. Regions expand from their geographic origins while origin dots
+    and dotted connector lines preserve the relationship to the parent geography.
+    Includes prepared New Jersey and Texas boundaries with lazy local-area loading.
+    The package ships a self-contained JavaScript visualization engine with
+    light-first styling and supports selections, dragging, and reactive updates.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.1.0)
+Imports:
+    htmlwidgets (>= 1.6.0),
+    htmltools (>= 0.5.0),
+    jsonlite (>= 1.8.0),
+    shiny (>= 1.7.0)
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    bslib
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+RoxygenNote: 7.3.3
