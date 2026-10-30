@@ -25,10 +25,8 @@ Once **CRAN** and **GitHub** releases are available, the installation commands w
 # CRAN, after publication
 install.packages("bloomr")
 
-# GitHub, after the repository is public
-# Replace ACCOUNT with the repository owner's GitHub username.
 install.packages("remotes")
-remotes::install_github("ACCOUNT/bloomr")
+remotes::install_github("prigasG/bloomr")
 ```
 
 The source release includes its map assets. No online mapping service or `sf` installation is needed for the included examples.
