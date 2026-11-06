@@ -13,8 +13,8 @@ bloom_map(
   county = NULL,
   theme = c("light", "dark", "auto"),
   preset = c("dashboard", "viewer", "studio"),
-  appearance = c("card", "seamless"),
-  controls = TRUE,
+  appearance = c("seamless", "card"),
+  controls = FALSE,
   dots = TRUE,
   connectors = TRUE,
   overview_boundaries = TRUE,
@@ -56,13 +56,14 @@ or `"county_local"` to start at one county and bloom its local areas.}
 \item{preset}{One of `"dashboard"`, `"viewer"`, or `"studio"`. All three
 retain origin dots and dotted connectors.}
 
-\item{appearance}{`"card"` (default) shows the map in a neat bordered card.
-`"seamless"` removes the card border and background so the map blends into
+\item{appearance}{`"seamless"` (default) has no card border or background.
+`"card"` places the map in a bordered card. The seamless map blends into
 its surrounding Shiny dashboard or HTML page. The map itself stays visible.}
 
-\item{controls}{Show the full map toolbar (default `TRUE`). If `FALSE`,
-use the map directly: click to bloom/select, double-click an area to
-explore it, and use small contextual buttons to explore or go back.
+\item{controls}{Show the full map toolbar (default `FALSE`). With the default,
+click the map or press Enter to bloom, select an area, then double-click
+or press Enter again to explore it. Small contextual buttons provide
+Explore and Back actions. Set `TRUE` to show the full toolbar.
 Ctrl+mouse wheel zooms while ordinary scrolling remains available.}
 
 \item{dots, connectors}{Whether to show original geographic anchors and

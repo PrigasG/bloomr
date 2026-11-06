@@ -1,4 +1,4 @@
-"""Test seamless, toolbar-free maps and retain the ordinary card behavior."""
+"""Test the default map-only view and the optional card and toolbar."""
 import json
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -22,10 +22,10 @@ with sync_playwright() as pw:
     page.add_script_tag(content=js)
     page.evaluate('''(g) => {
        new Bloomr.Map(document.getElementById('seamless'),{
-          geography:'nj',inlineGeometry:g,appearance:'seamless',controls:false,duration:0
+          geography:'nj',inlineGeometry:g,duration:0
        });
        new Bloomr.Map(document.getElementById('card'),{
-          geography:'nj',inlineGeometry:g,duration:0
+          geography:'nj',inlineGeometry:g,appearance:'card',controls:true,duration:0
        });
     }''',geometry)
     page.wait_for_function('Bloomr.instances.get("seamless").ready && Bloomr.instances.get("card").ready')
@@ -45,6 +45,15 @@ with sync_playwright() as pw:
     assert page.locator('#seamless .bloomr-minimal-nav').is_visible()
     assert page.locator('#seamless .bloomr-connector').count()==21
     assert page.locator('#seamless .bloomr-origin-dot').count()==21
+    county = page.locator('#seamless .bloomr-county[aria-label^="Bergen County"]')
+    county.focus()
+    county.press('Enter')
+    assert page.get_by_role('button',name='Explore selected region').is_visible()
+    county.press('Enter')
+    page.wait_for_function('Bloomr.instances.get("seamless").localExpanded && !Bloomr.instances.get("seamless").busy')
+    assert page.locator('#seamless .bloomr-local').count()>0
+    page.locator('#seamless .bloomr-minimal-nav button[aria-label="Return to parent geography"]').click()
+    page.wait_for_function('!Bloomr.instances.get("seamless").localExpanded && !Bloomr.instances.get("seamless").busy')
     page.evaluate('Bloomr.instances.get("seamless").select("bergen")')
     assert page.get_by_role('button',name='Explore selected region').is_visible()
     page.get_by_role('button',name='Explore selected region').click()
@@ -61,9 +70,9 @@ with sync_playwright() as pw:
           clientX:r.left+r.width/2,clientY:r.top+r.height/2,deltaY:-100}));
     }''')
     assert page.evaluate('Bloomr.instances.get("seamless").camera.k')>1
-    # Default card untouched by seamless configuration or navigation.
+    # Optional card remains independent of map-only navigation.
     assert page.evaluate('Bloomr.instances.get("card").countyExpanded') is False
     page.screenshot(path=str(root.parent/'bloomr_seamless_preview.png'))
     assert errors==[],errors
-    print('PASS: seamless styling, toolbar hidden, click bloom, origin guides, local view, Back, Ctrl+wheel, independent card')
+    print('PASS: default map-only styling, click and keyboard bloom, origin guides, local view, Back, Ctrl+wheel, optional card')
     browser.close()

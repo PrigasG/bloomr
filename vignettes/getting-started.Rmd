@@ -14,8 +14,8 @@ library(bloomr)
 bloom_map()
 ```
 
-1. Select **Bloom counties** to spread the counties apart.
-2. Select a county and choose **Bloom municipalities** to see its smaller areas.
+1. Click the map or focus it and press **Enter** to spread the counties apart.
+2. Select a county, then double-click it, press **Enter** again, or choose **Explore** to see its smaller areas.
 3. Drag a shape to move it. The dot and dotted line show where it came from.
 4. Choose **Back** to return one level.
 

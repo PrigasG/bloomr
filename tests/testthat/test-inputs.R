@@ -68,16 +68,16 @@ test_that("boundary and label options are available with safe defaults", {
 })
 
 
-test_that("card and seamless embedding keep the same map defaults", {
+test_that("map-only embedding is the default and the full card is optional", {
   normal <- bloom_map("nj")
-  expect_identical(normal$x$appearance, "card")
-  expect_true(normal$x$controls)
-  minimal <- bloom_map("nj", appearance = "seamless", controls = FALSE)
-  expect_identical(minimal$x$appearance, "seamless")
-  expect_false(minimal$x$controls)
-  expect_true(minimal$x$dots)
-  expect_true(minimal$x$connectors)
-  expect_true(minimal$x$draggable)
+  expect_identical(normal$x$appearance, "seamless")
+  expect_false(normal$x$controls)
+  card <- bloom_map("nj", appearance = "card", controls = TRUE)
+  expect_identical(card$x$appearance, "card")
+  expect_true(card$x$controls)
+  expect_true(normal$x$dots)
+  expect_true(normal$x$connectors)
+  expect_true(normal$x$draggable)
   expect_error(bloom_map("nj", appearance = "invalid"), "arg")
   expect_error(bloom_map("nj", controls = NA), "TRUE or FALSE")
 })

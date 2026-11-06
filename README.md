@@ -42,7 +42,9 @@ library(bloomr)
 bloom_map()
 ```
 
-Choose **Bloom counties**, select a county, and then choose **Bloom municipalities** to explore smaller areas. Drag an area to move it, hover to see its name, or use **Back** to return.
+Click the map or focus it and press **Enter** to bloom counties. Select a county,
+then double-click it, press **Enter** again, or choose **Explore** to see smaller
+areas. Drag an area to move it, hover to see its name, or use **Back** to return.
 
 New Jersey (`"nj"`, the default) and Texas (`"tx"`) are included as ready-to-use examples. You can also use your own polygon boundaries with `sf` or GeoJSON.
 
@@ -110,21 +112,24 @@ Bloom also works beside `ggplot2` and Plotly. [Try the example dashboard](inst/e
 
 ## Customization
 
-For a map that blends into an existing dashboard, remove the surrounding card and toolbar:
+The default is just the map, with no surrounding card or full toolbar. It blends
+into a dashboard or report. To show the bordered card and full toolbar:
 
 ``` r
-bloom_map(appearance = "seamless", controls = FALSE)
+bloom_map(appearance = "card", controls = TRUE)
 ```
 
-Click the map to bloom, click a region to select it, and double-click a region or choose **Explore** to see smaller areas. A small **Back** button appears when needed. Use Ctrl+mouse wheel to zoom, or press Escape to return. Normal scrolling in the dashboard still works.
+With the default, a small **Explore** or **Back** button appears when needed.
+Use Ctrl+mouse wheel to zoom, or press Escape to return. Normal page scrolling
+still works.
 
 Light mode, tooltips, and smooth animations are on by default. Map labels are hidden to keep crowded areas easy to explore. Tooltips show the area's name and indicator, with optional extra fields.
 
 | Option | Default | Purpose |
 |----|----|----|
 | `theme` | `"light"` | Light, dark, or automatic theme |
-| `appearance` | `"card"` | Card or seamless map |
-| `controls` | `TRUE` | Full toolbar or compact navigation |
+| `appearance` | `"seamless"` | Map only or bordered card |
+| `controls` | `FALSE` | Direct mouse and keyboard navigation or full toolbar |
 | `labels` | `"none"` | No labels, selected area, chosen areas, or non-overlapping labels |
 | `dots` | `TRUE` | Show original locations |
 | `connectors` | `TRUE` | Link expanded areas to their origins |
@@ -145,7 +150,7 @@ To expand smaller areas from the parent's *expanded* position, instead of its or
 bloom_map(local_origin = "expanded")
 ```
 
-The **Display** menu also has **Bloom from expanded parent**. This keeps the parent boundaries, origin dots, and dotted lines together, even when the parent has been dragged. The original position remains the default.
+With `controls = TRUE`, the **Display** menu also has **Bloom from expanded parent**. This keeps the parent boundaries, origin dots, and dotted lines together, even when the parent has been dragged. The original position remains the default.
 
 For example, show only two county labels while leaving hover tooltips available everywhere:
 
@@ -172,7 +177,7 @@ Use `tooltip_data` to supply a separate table instead. See [Using your own data]
 - [Boundaries and labels](inst/examples/boundaries-and-labels.R): choose what appears on the map.
 - [Local bloom origin](inst/examples/local-bloom-origin.R): start from the original or expanded parent location.
 - [Two maps in Shiny](inst/examples/two-maps.R): use independent maps on the same page.
-- [Seamless Shiny map](inst/examples/seamless-dashboard.R): embed a map without the surrounding card or toolbar.
+- [Seamless Shiny map](inst/examples/seamless-dashboard.R): embed the default map in a dashboard.
 - [Bloom with ggplot2 and Plotly](inst/examples/coexisting-plots/app.R): show three views of the same data and highlight the selected county.
 - [Custom geography example](inst/examples/custom-geography.R): create a small custom map.
 

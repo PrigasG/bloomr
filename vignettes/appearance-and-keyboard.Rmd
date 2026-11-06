@@ -14,17 +14,21 @@ library(bloomr)
 bloom_map()
 ```
 
-The map uses a light theme and displays original-location dots, dotted connectors, and the original geographic boundaries. Area names appear on hover. Labels are hidden by default to avoid clutter.
+The map has no surrounding card or full toolbar. It uses a light theme and displays original-location dots, dotted connectors, and the original geographic boundaries. Area names appear on hover. Labels are hidden by default to avoid clutter.
 
-## Fit the map into a dashboard
+## Add a card and toolbar when useful
 
-The map normally appears in a bordered card with a toolbar. For a simpler view:
+The map-only view fits directly into a dashboard or report. To show a bordered
+card and full toolbar instead:
 
 ```{r, eval=FALSE}
-bloom_map(appearance = "seamless", controls = FALSE)
+bloom_map(appearance = "card", controls = TRUE)
 ```
 
-This removes the card border, background, and full toolbar. The Bloom map, dots, connector lines, hover tooltips, and dragging remain. Click the map to bloom, select a region, and double-click it or choose **Explore**. A small **Back** button appears when needed. Ctrl+mouse wheel zooms the map without blocking normal page scrolling.
+With the default map-only view, click the map to bloom, select a region, and
+double-click it or press Enter again to explore. A small **Explore** or **Back**
+button appears when needed. Ctrl+mouse wheel zooms without blocking normal page
+scrolling. The full toolbar remains available through `controls = TRUE`.
 
 ## Change the theme or animation
 
@@ -39,7 +43,7 @@ bloom_map(draggable = FALSE)
 
 ## Show or hide boundaries
 
-The map's **Display** menu contains two separate controls:
+With `controls = TRUE`, the map's **Display** menu contains two separate controls:
 
 - **Overview: county lines** shows the county outlines inside the original state map.
 - **Local: municipality/subdivision lines** shows the outlines inside the selected county.
@@ -60,7 +64,7 @@ start at the parent's current expanded (or dragged) location instead:
 bloom_map(local_origin = "expanded")
 ```
 
-You can also switch **Bloom from expanded parent** in the **Display** menu
+With `controls = TRUE`, you can also switch **Bloom from expanded parent** in the **Display** menu
 before opening the local view. Either choice keeps the reference boundaries,
 origin dots, and dotted connectors aligned with the local map. Returning to
 the parent uses the same smooth transition.
@@ -79,10 +83,10 @@ Use `"selected"` for the selected area, `"all"` for labels with basic overlap fi
 
 | Key | Action |
 | --- | --- |
-| Tab | Reach the toolbar and active map areas |
+| Tab | Reach the map, active areas, and contextual controls |
 | Arrow keys | Move focus between areas |
 | Home / End | Go to the first or last area |
-| Enter / Space | Select the focused area |
+| Enter / Space | Bloom the focused state; select a focused county, then press again to explore its local areas |
 | L | Show or hide the focused area's label |
 | Escape | Close Display or return to the previous level |
 

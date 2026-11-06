@@ -9,7 +9,7 @@
 - Add optional tooltip details from indicator data or a separate table, without writing HTML.
 - Try custom geography with an included GeoJSON spatial file and a short example.
 - Browse the package reference and guides through the pkgdown website.
-- Choose a seamless, toolbar-free map for embedding in existing dashboards without changing the standard card view.
+- Use a seamless, toolbar-free map by default; request the bordered card and full toolbar when needed.
 - Explore a linked Shiny dashboard showing Bloom beside ggplot2 and Plotly, with shared county selection.
 - Choose whether local regions bloom from the original geographic location or the expanded parent position (`local_origin`).
 - Use `view = "state_county"` to stop at counties or `view = "county_local"` to start with one county and bloom its municipalities or subdivisions.

@@ -267,7 +267,7 @@
   class BloomMap {
     constructor(el, config) {
       this.el = el;
-      this.config = Object.assign({ geography: "nj", theme: "light", preset: "dashboard", appearance: "card", controls: true, dots: true, connectors: true,
+      this.config = Object.assign({ geography: "nj", theme: "light", preset: "dashboard", appearance: "seamless", controls: false, dots: true, connectors: true,
         overviewBoundaries: true, localBoundaries: true, localOrigin: "original", labels: "none", labelAreas: [],
         draggable: true, duration: 470 }, config || {});
       this.config.labels = ["none", "selected", "all", "custom"].includes(this.config.labels) ? this.config.labels : "none";
@@ -515,7 +515,7 @@
         this._updateLegend();
         this.ready = true;
         this._syncKeyboardFocus();
-        this.status.textContent = `${this.meta.name} ready. Select Bloom counties to expand the map.`;
+        this.status.textContent = `${this.meta.name} ready. Click the map or press Enter to bloom ${this.meta.countyLabel}.`;
         this._refreshToolbar();
       } catch (error) {
         if (!this.destroyed) {
@@ -878,7 +878,10 @@
         e.preventDefault(); this._togglePinned(f); return;
       }
       if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault(); this.select(f.__id, level); return;
+        e.preventDefault();
+        if (level === "county" && this.selected === f && this.config.maxLevel !== "county") this.expandLocal();
+        else this.select(f.__id, level);
+        return;
       }
       if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(e.key)) return;
       e.preventDefault();
