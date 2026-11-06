@@ -116,6 +116,7 @@
     if (!Array.isArray(features) || !features.length) return;
 
     const scale = Number(options.scale) || 1;
+    const shapeScale = Number(options.shapeScale) || 1;
     const radialKick = Number(options.radialKick) || 0;
     const gap = Math.max(0, Number(options.gap) || 0);
     const iterations = Math.max(1, Math.round(Number(options.iterations) || 180));
@@ -153,8 +154,8 @@
         targetX,
         targetY,
         targetRadius: Math.hypot(targetX - parentX, targetY - parentY),
-        halfWidth: width / 2,
-        halfHeight: height / 2,
+        halfWidth: width * (feature.__bloom === false ? 1 : shapeScale) / 2,
+        halfHeight: height * (feature.__bloom === false ? 1 : shapeScale) / 2,
         x: targetX,
         y: targetY
       };
@@ -269,7 +270,7 @@
       this.el = el;
       this.config = Object.assign({ geography: "nj", theme: "light", preset: "dashboard", appearance: "seamless", controls: false, dots: true, connectors: true,
         overviewBoundaries: true, localBoundaries: true, localOrigin: "original", labels: "none", labelAreas: [],
-        draggable: true, duration: 470, showLegend: true, mapZoom: 1, bloomSpread: 1 }, config || {});
+        draggable: true, duration: 470, showLegend: true, mapZoom: 1, bloomSpread: 1, bloomScale: 1 }, config || {});
       if (this.config.bloomAreas != null && !Array.isArray(this.config.bloomAreas)) {
         this.config.bloomAreas = [this.config.bloomAreas];
       }
@@ -476,6 +477,7 @@
         const spread = clamp(Number(this.config.bloomSpread) || 1, .5, 1.5);
         computeGeographicExpansion(this.counties, this.stateCenter, {
           scale: 1 + .67 * .95 * spread, radialKick: 34 * .95 * spread, gap: (7 + .95 * 2.2) * spread,
+          shapeScale: this.config.bloomScale,
           iterations: 190, cleanupIterations: 90, attraction: .085,
           maxBearingDrift: .20, offsetProperty: "__baseCountyOffset"
         });
@@ -568,7 +570,11 @@
     _renderNode(f, progress) {
       const movedProgress = f.__bloom === false ? 0 : progress;
       const o = this._offset(f), dx = o.x * movedProgress, dy = o.y * movedProgress;
-      f.pathEl.setAttribute("transform", `translate(${dx},${dy})`);
+      const shapeScale = 1 + (this.config.bloomScale - 1) * clamp(movedProgress, 0, 1);
+      const [cx, cy] = f.__centroid;
+      f.pathEl.setAttribute("transform", shapeScale === 1
+        ? `translate(${dx},${dy})`
+        : `translate(${dx},${dy}) translate(${cx},${cy}) scale(${shapeScale}) translate(${-cx},${-cy})`);
       f.pathEl.setAttribute("opacity", progress <= 0 ? 0 : 1);
       f.pathEl.setAttribute("pointer-events", progress > .85 ? "all" : "none");
       if (f.trail) {
@@ -750,6 +756,7 @@
           scale: 1 + (2.25 + .95 * .95 + countBoost - 1) * spread,
           radialKick: (10 + .95 * 7 + countBoost * 5) * spread,
           gap: (4.5 + countBoost * 2.4) * spread, iterations: 240, cleanupIterations: 90,
+          shapeScale: this.config.bloomScale,
           attraction: .072, maxBearingDrift: .24, offsetProperty: "__baseMunicipalityOffset"
         });
         this.localRefLayer.replaceChildren(); this.localLineLayer.replaceChildren();
@@ -819,8 +826,13 @@
       const ys = [f.__bounds[0][1] + shift.y, f.__bounds[1][1] + shift.y];
       this.locals.forEach(l => {
         const o = this._offset(l);
-        xs.push(l.__bounds[0][0] + o.x + shift.x, l.__bounds[1][0] + o.x + shift.x);
-        ys.push(l.__bounds[0][1] + o.y + shift.y, l.__bounds[1][1] + o.y + shift.y);
+        const s = l.__bloom === false ? 1 : this.config.bloomScale;
+        const halfWidth = (l.__bounds[1][0] - l.__bounds[0][0]) * s / 2;
+        const halfHeight = (l.__bounds[1][1] - l.__bounds[0][1]) * s / 2;
+        xs.push(l.__centroid[0] + o.x + shift.x - halfWidth,
+          l.__centroid[0] + o.x + shift.x + halfWidth);
+        ys.push(l.__centroid[1] + o.y + shift.y - halfHeight,
+          l.__centroid[1] + o.y + shift.y + halfHeight);
       });
       const left = Math.min(...xs) - 28, right = Math.max(...xs) + 28;
       const top = Math.min(...ys) - 28, bottom = Math.max(...ys) + 28;

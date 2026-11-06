@@ -71,6 +71,9 @@
 #'   also zoom interactively.
 #' @param bloom_spread How far regions separate when they bloom, from `0.5` to
 #'   `1.5` (default `1`). This changes spacing without distorting polygon shapes.
+#' @param bloom_scale Size of moved areas relative to their original shapes,
+#'   from `1` to `1.6` (default `1`). The parent map and areas left in place
+#'   retain their original size. Larger values may need a taller widget.
 #' @return An `htmlwidget` suitable for Shiny, Quarto HTML, and R Markdown HTML.
 #' @examples
 #' bloom_map("nj")
@@ -94,7 +97,8 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
                       value_label = NULL, value_suffix = "", show_legend = TRUE,
                       portable = FALSE,
                       tooltip_fields = NULL, tooltip_data = NULL,
-                      local_origin = c("original", "expanded")) {
+                      local_origin = c("original", "expanded"),
+                      bloom_scale = 1) {
   if (!is.null(tooltip_data) && is.null(tooltip_fields)) {
     stop("Set `tooltip_fields` to choose which tooltip columns to show.", call. = FALSE)
   }
@@ -176,6 +180,10 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
       bloom_spread < 0.5 || bloom_spread > 1.5) {
     stop("`bloom_spread` must be one number from 0.5 to 1.5.", call. = FALSE)
   }
+  if (!is.numeric(bloom_scale) || length(bloom_scale) != 1L || !is.finite(bloom_scale) ||
+      bloom_scale < 1 || bloom_scale > 1.6) {
+    stop("`bloom_scale` must be one number from 1 to 1.6.", call. = FALSE)
+  }
   flags <- list(controls = controls, dots = dots, connectors = connectors, draggable = draggable,
                 show_legend = show_legend,
                 overview_boundaries = overview_boundaries,
@@ -240,6 +248,7 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
              bloomAreas = if (is.null(bloom_areas)) NULL else as.list(bloom_areas), bloomColor = bloom_color,
              draggable = draggable, duration = as.numeric(duration),
              mapZoom = as.numeric(map_zoom), bloomSpread = as.numeric(bloom_spread),
+             bloomScale = as.numeric(bloom_scale),
              data = rows, tooltipRows = tooltip_rows, inlineGeometry = prepared,
              maxLevel = if (view == "full") "local" else "county",
              customMeta = if (!is.null(view_meta)) view_meta else if (geography == "custom") attr(prepared, "meta") else NULL,

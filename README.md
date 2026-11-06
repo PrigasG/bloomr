@@ -172,6 +172,17 @@ bloom_map("nj", width = "100%", height = "650px",
 
 With `controls = TRUE`, Fit returns to `map_zoom`; interactive zoom still works. `bloom_spread` changes spacing without stretching geographic shapes: values below `1` make a tighter bloom, and values above `1` spread areas farther apart. High zoom and spread values can crop the outer areas, so adjust them together. In Shiny, size the output container with `bloomOutput("map", height = "650px")`.
 
+To make **only the moved shapes** stand out, set `bloom_scale` above `1`. The parent map and areas left in place keep their original size. For example, bloom just Bergen County at 35% larger than its source shape:
+
+``` r
+bloom_map("nj", view = "state_county", bloom_areas = "bergen",
+          bloom_color = "#F97316", bloom_scale = 1.35)
+```
+
+![Bergen County enlarged after blooming while the New Jersey state map remains at its original size](man/figures/nj-enlarged-county-bloom.png)
+
+`bloom_scale = 1` is the default. Values up to `1.6` enlarge each moved county or local area around its own center; the layout makes room for them. With many areas, use a taller widget or a smaller scale if the result feels crowded. Origin dots and connectors still point to each area's original position.
+
 Light mode, tooltips, and smooth animations are on by default. Map labels are hidden to keep crowded areas easy to explore. Tooltips show the area's name and indicator, with optional extra fields.
 
 | Option | Default | Purpose |
@@ -185,6 +196,7 @@ Light mode, tooltips, and smooth animations are on by default. Map labels are hi
 | `width`, `height` | `NULL`, `"520px"` | Widget dimensions in reports and the RStudio Viewer |
 | `map_zoom` | `1` | Starting magnification of the whole map |
 | `bloom_spread` | `1` | Distance between bloomed areas |
+| `bloom_scale` | `1` | Size of moved shapes; parent map stays the same size |
 | `labels` | `"none"` | No labels, selected area, chosen areas, or non-overlapping labels |
 | `dots` | `TRUE` | Show original locations |
 | `connectors` | `TRUE` | Link expanded areas to their origins |

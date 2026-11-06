@@ -97,13 +97,18 @@ test_that("map zoom and bloom spacing are configurable", {
   normal <- bloom_map("nj")
   expect_identical(normal$x$mapZoom, 1)
   expect_identical(normal$x$bloomSpread, 1)
+  expect_identical(normal$x$bloomScale, 1)
   larger <- bloom_map("nj", width = "100%", height = "650px",
-                      map_zoom = 1.4, bloom_spread = 1.2)
+                      map_zoom = 1.4, bloom_spread = 1.2, bloom_scale = 1.35)
   expect_identical(larger$x$mapZoom, 1.4)
   expect_identical(larger$x$bloomSpread, 1.2)
+  expect_identical(larger$x$bloomScale, 1.35)
   expect_error(bloom_map("nj", map_zoom = 0), "map_zoom")
   expect_error(bloom_map("nj", map_zoom = NA_real_), "map_zoom")
   expect_error(bloom_map("nj", bloom_spread = 2), "bloom_spread")
+  expect_error(bloom_map("nj", bloom_scale = 0.9), "bloom_scale")
+  expect_error(bloom_map("nj", bloom_scale = NA_real_), "bloom_scale")
+  expect_error(bloom_map("nj", bloom_scale = 2), "bloom_scale")
 })
 
 

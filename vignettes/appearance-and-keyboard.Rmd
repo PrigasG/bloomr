@@ -49,6 +49,21 @@ Values above `1` spread regions farther; large zoom and spread values can crop
 the outer areas, so adjust them together. Viewers can still use Ctrl+mouse wheel
 or the toolbar zoom buttons.
 
+To enlarge just the moved shapes, keep the background map at its usual size and
+set `bloom_scale` above `1`:
+
+```{r, eval=FALSE}
+bloom_map("nj", view = "state_county", bloom_areas = "bergen",
+          bloom_color = "#F97316", bloom_scale = 1.35)
+```
+
+![Bergen County enlarged after blooming, with the state map behind it](../man/figures/nj-enlarged-county-bloom.png)
+
+The default is `bloom_scale = 1`; accepted values are `1` through `1.6`.
+It applies to moved counties or local areas, and leaves the parent map and
+unmoved areas unchanged. The layout reserves space for enlarged shapes.
+Dots and connectors remain at the original geographic anchors.
+
 ## Change the theme or animation
 
 ```{r, eval=FALSE}

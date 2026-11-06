@@ -38,7 +38,8 @@ bloom_map(
   portable = FALSE,
   tooltip_fields = NULL,
   tooltip_data = NULL,
-  local_origin = c("original", "expanded")
+  local_origin = c("original", "expanded"),
+  bloom_scale = 1
 )
 }
 \arguments{
@@ -139,6 +140,10 @@ from the attributes of a custom `sf` geography when `data` is absent.}
 uses the parent's geographic location; `"expanded"` uses its current
 expanded or dragged position. Origin dots, reference lines, and connectors
 stay with the chosen starting location. Change this in the Display menu too.}
+
+\item{bloom_scale}{Size of moved areas relative to their original shapes,
+from `1` to `1.6` (default `1`). The parent map and areas left in place
+retain their original size. Larger values may need a taller widget.}
 }
 \value{
 An `htmlwidget` suitable for Shiny, Quarto HTML, and R Markdown HTML.
