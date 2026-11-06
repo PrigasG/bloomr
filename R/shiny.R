@@ -55,19 +55,75 @@ bloom_expand <- function(proxy, level = c("county", "local")) {
 #' @param tooltip_data Optional separate tooltip data frame, using `key` as
 #'   its identifier column. Existing tooltip details are preserved when
 #'   `tooltip_fields` is not supplied.
+#' @param value_label Optional new legend title (keeps the current title when
+#'   `NULL`). Useful when switching the indicator in a running dashboard.
+#' @param value_suffix Optional new unit suffix, such as `"%"` or
+#'   `" people/mi2"`; `NULL` preserves the current suffix.
 #' @export
 bloom_update_data <- function(proxy, data, key = "geoid", value,
-                              tooltip_fields = NULL, tooltip_data = NULL) {
+                              tooltip_fields = NULL, tooltip_data = NULL,
+                              value_label = NULL, value_suffix = NULL) {
   if (!is.null(tooltip_data) && is.null(tooltip_fields)) {
     stop("Set `tooltip_fields` when providing `tooltip_data`.", call. = FALSE)
   }
   args <- list(rows = .bloom_rows(data, key, value))
+  if (!is.null(value_label)) {
+    if (!is.character(value_label) || length(value_label) != 1L || is.na(value_label)) {
+      stop("`value_label` must be one text string.", call. = FALSE)
+    }
+    args$valueLabel <- value_label
+  }
+  if (!is.null(value_suffix)) {
+    if (!is.character(value_suffix) || length(value_suffix) != 1L || is.na(value_suffix)) {
+      stop("`value_suffix` must be one text string.", call. = FALSE)
+    }
+    args$valueSuffix <- value_suffix
+  }
   if (!is.null(tooltip_fields)) {
     args$tooltipRows <- .bloom_tooltip_rows(
       if (is.null(tooltip_data)) data else tooltip_data, key, tooltip_fields)
     if (is.null(args$tooltipRows)) args$tooltipRows <- list()
   }
   .bloom_command(proxy, "data", args)
+}
+
+#' Adjust Bloom size and spacing in a running Shiny map
+#'
+#' Changes an existing map without rebuilding its geography. Current
+#' selections and manually moved positions are preserved. The settings are
+#' also available when creating a map with [bloom_map()].
+#'
+#' @param proxy Result of [bloomProxy()].
+#' @param bloom_scale Optional size of expanded areas, from `1` to `1.6`.
+#'   `1` keeps the original polygon size; `1.6` makes it 60 percent larger.
+#' @param bloom_spread Optional spacing between expanded areas, from `0.5`
+#'   to `1.5`. This does not change their shape size.
+#' @return Invisibly returns `proxy`.
+#' @examples
+#' if (interactive()) {
+#'   # Inside a Shiny server, after the map has rendered:
+#'   # bloom_update_bloom(bloomProxy("map"), bloom_scale = 1.5)
+#' }
+#' @export
+bloom_update_bloom <- function(proxy, bloom_scale = NULL, bloom_spread = NULL) {
+  if (is.null(bloom_scale) && is.null(bloom_spread)) {
+    stop("Set `bloom_scale` and/or `bloom_spread`.", call. = FALSE)
+  }
+  check <- function(x, name, lower, upper) {
+    if (is.null(x)) return(NULL)
+    if (!is.numeric(x) || length(x) != 1L || is.na(x) || !is.finite(x) ||
+        x < lower || x > upper) {
+      stop(sprintf("`%s` must be one number from %s to %s.", name, lower, upper),
+           call. = FALSE)
+    }
+    as.numeric(x)
+  }
+  scale <- check(bloom_scale, "bloom_scale", 1, 1.6)
+  spread <- check(bloom_spread, "bloom_spread", 0.5, 1.5)
+  args <- list()
+  if (!is.null(scale)) args$bloomScale <- scale
+  if (!is.null(spread)) args$bloomSpread <- spread
+  .bloom_command(proxy, "bloom", args)
 }
 
 #' Return a Bloom map to its initial state

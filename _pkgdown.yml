@@ -41,6 +41,7 @@ reference:
       - bloom_expand
       - bloom_reset
       - bloom_update_data
+      - bloom_update_bloom
   - title: Examples
     contents:
       - run_bloom_example

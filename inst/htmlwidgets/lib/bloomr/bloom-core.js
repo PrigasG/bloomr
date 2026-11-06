@@ -474,13 +474,7 @@
         this.stateInfo = geometryInfo(region, this.project);
         this.stateCenter = this.stateInfo.center;
         this.counties = counties.features.slice().sort((a, b) => String(a.properties?.name).localeCompare(String(b.properties?.name))).map(f => this._prepare(f, "county"));
-        const spread = clamp(Number(this.config.bloomSpread) || 1, .5, 1.5);
-        computeGeographicExpansion(this.counties, this.stateCenter, {
-          scale: 1 + .67 * .95 * spread, radialKick: 34 * .95 * spread, gap: (7 + .95 * 2.2) * spread,
-          shapeScale: this.config.bloomScale,
-          iterations: 190, cleanupIterations: 90, attraction: .085,
-          maxBearingDrift: .20, offsetProperty: "__baseCountyOffset"
-        });
+        this._computeCountyOffsets();
         this.statePath = elem("path", "bloomr-parent", this.stateLayer);
         this.statePath.setAttribute("d", this.stateInfo.path);
         this.statePath.setAttribute("tabindex", "0");
@@ -524,6 +518,7 @@
         this._syncKeyboardFocus();
         this.status.textContent = `${this.meta.name} ready. Click the map or press Enter to bloom ${this.meta.countyLabel}.`;
         this._refreshToolbar();
+        this._applyPendingBloomOptions();
       } catch (error) {
         if (!this.destroyed) {
           this.status.textContent = error.message || "Map initialization failed.";
@@ -532,7 +527,103 @@
         }
       }
     }
+    // Keep the same geographic solver for initial blooms and Shiny updates.
+    // No new geometry is downloaded or SVG paths recreated during a size change.
+    _computeCountyOffsets() {
+      const spread = clamp(Number(this.config.bloomSpread) || 1, .5, 1.5);
+      computeGeographicExpansion(this.counties, this.stateCenter, {
+        scale: 1 + .67 * .95 * spread, radialKick: 34 * .95 * spread,
+        gap: (7 + .95 * 2.2) * spread, shapeScale: this.config.bloomScale,
+        iterations: 190, cleanupIterations: 90, attraction: .085,
+        maxBearingDrift: .20, offsetProperty: "__baseCountyOffset"
+      });
+    }
+    _computeLocalOffsets() {
+      if (!this.selected || !this.locals.length) return;
+      const countBoost = Math.min(1.35, Math.max(0, (this.locals.length - 15) / 55));
+      const spread = clamp(Number(this.config.bloomSpread) || 1, .5, 1.5);
+      computeGeographicExpansion(this.locals, this.selected.__centroid, {
+        scale: 1 + (2.25 + .95 * .95 + countBoost - 1) * spread,
+        radialKick: (10 + .95 * 7 + countBoost * 5) * spread,
+        gap: (4.5 + countBoost * 2.4) * spread,
+        iterations: 240, cleanupIterations: 90, shapeScale: this.config.bloomScale,
+        attraction: .072, maxBearingDrift: .24,
+        offsetProperty: "__baseMunicipalityOffset"
+      });
+    }
+    // Change the bloom's shape size or spread without remounting the widget.
+    // Keeps current selections, manual drags, and local-area geometry.
+    setBloomOptions(args = {}) {
+      const updates = {};
+      for (const [key, low, high] of [["bloomScale", 1, 1.6], ["bloomSpread", .5, 1.5]]) {
+        if (!Object.prototype.hasOwnProperty.call(args, key)) continue;
+        const value = args[key];
+        if (typeof value !== "number" || !Number.isFinite(value) || value < low || value > high) {
+          console.warn(`bloomr: ${key} must be between ${low} and ${high}.`);
+          return;
+        }
+        updates[key] = value;
+      }
+      if (!Object.keys(updates).length) return;
+      if (!this.ready || this.busy || this.drag ||
+          (this.localExpanded && !this.locals.length)) {
+        this.pendingBloomOptions = { ...(this.pendingBloomOptions || {}), ...updates };
+        return;
+      }
+      const previousScale = Number(this.config.bloomScale) || 1;
+      const previousSpread = Number(this.config.bloomSpread) || 1;
+      if ((updates.bloomScale ?? previousScale) === previousScale &&
+          (updates.bloomSpread ?? previousSpread) === previousSpread) return;
+      const features = [...this.counties, ...this.locals];
+      const oldOffsets = new Map(features.map(f => [f, { ...this._offset(f) }]));
+      const oldLocalShift = { ...this.localBaseShift };
+      this.config.bloomScale = updates.bloomScale ?? previousScale;
+      this.config.bloomSpread = updates.bloomSpread ?? previousSpread;
+      this._computeCountyOffsets();
+      if (this.localExpanded) this._computeLocalOffsets();
+      const nextLocalShift = this.localExpanded && this.config.localOrigin === "expanded"
+        ? { ...this._offset(this.selected) } : oldLocalShift;
+      const offsets = new Map(features.map(f => [f, {
+        from: oldOffsets.get(f), to: { ...this._offset(f) }
+      }]));
+      if (!this.countyExpanded) {
+        this.status.textContent = "Bloom size and spacing updated. Expand the map to view them.";
+        return;
+      }
+      const cameraFrom = { ...this.camera };
+      this.localBaseShift = nextLocalShift;
+      const cameraTo = this.localExpanded ? this._localCamera() : cameraFrom;
+      this.bloomTransition = { offsets, fromScale: previousScale,
+        toScale: this.config.bloomScale, t: 0 };
+      const draw = progress => {
+        this.bloomTransition.t = progress;
+        this._render(1);
+        if (this.localExpanded) {
+          this.localBaseShift = {
+            x: oldLocalShift.x + (nextLocalShift.x - oldLocalShift.x) * progress,
+            y: oldLocalShift.y + (nextLocalShift.y - oldLocalShift.y) * progress
+          };
+          this._positionLocalLayers();
+          this.locals.forEach(f => this._renderNode(f, 1));
+          this._moveCamera(cameraFrom, cameraTo, progress);
+        }
+      };
+      this._animate(Math.min(this.config.duration, 320), t => draw(t), () => {
+        this.bloomTransition = null;
+        this._render(1);
+        if (this.localExpanded) {
+          this.localBaseShift = nextLocalShift;
+          this._positionLocalLayers();
+          this.locals.forEach(f => this._renderNode(f, 1));
+        }
+        this._updateLabels();
+        this.status.textContent = `Bloom size ${this.config.bloomScale.toFixed(2)}×, spread ${this.config.bloomSpread.toFixed(2)}×.`;
+      }, easeInOut);
+    }
     _prepare(f, level) {
+      // Never attach instance-specific DOM nodes or layout offsets to shared
+      // GeoJSON objects. Two widgets may receive the same in-memory geometry.
+      f = { ...f };
       const info = geometryInfo(f, this.project);
       const p = f.properties || {};
       f.__id = level === "county" ? makeCountyId(f) : makeLocalId(f);
@@ -563,6 +654,12 @@
     }
     _offset(f) {
       if (f.__bloom === false) return { x: 0, y: 0 };
+      const tween = this.bloomTransition?.offsets.get(f);
+      if (tween) {
+        const t = this.bloomTransition.t;
+        return { x: tween.from.x + (tween.to.x - tween.from.x) * t,
+          y: tween.from.y + (tween.to.y - tween.from.y) * t };
+      }
       const base = f.__level === "local" ? f.__baseMunicipalityOffset : f.__baseCountyOffset;
       const manual = f.__level === "local" ? this.manualLocal.get(f.__id) : this.manualCounty.get(f.__id);
       return add(base, manual);
@@ -570,7 +667,11 @@
     _renderNode(f, progress) {
       const movedProgress = f.__bloom === false ? 0 : progress;
       const o = this._offset(f), dx = o.x * movedProgress, dy = o.y * movedProgress;
-      const shapeScale = 1 + (this.config.bloomScale - 1) * clamp(movedProgress, 0, 1);
+      const activeScale = this.bloomTransition
+        ? this.bloomTransition.fromScale +
+          (this.bloomTransition.toScale - this.bloomTransition.fromScale) * this.bloomTransition.t
+        : (Number(this.config.bloomScale) || 1);
+      const shapeScale = 1 + (activeScale - 1) * clamp(movedProgress, 0, 1);
       const [cx, cy] = f.__centroid;
       f.pathEl.setAttribute("transform", shapeScale === 1
         ? `translate(${dx},${dy})`
@@ -602,7 +703,9 @@
     _animate(ms, onFrame, done, easing = easeBack) {
       if (this.currentAnimation !== null) cancelAnimationFrame(this.currentAnimation);
       const reduced = global.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-      if (reduced || ms <= 0) { onFrame(1, 1); done?.(); return; }
+      if (reduced || ms <= 0) {
+        onFrame(1, 1); done?.(); this._applyPendingBloomOptions(); return;
+      }
       this.busy = true; this._refreshToolbar();
       const started = performance.now();
       const tick = now => {
@@ -610,9 +713,16 @@
         const t = clamp((now - started) / ms, 0, 1);
         onFrame(easing(t), t);
         if (t < 1) this.currentAnimation = requestAnimationFrame(tick);
-        else { this.currentAnimation = null; this.busy = false; done?.(); this._refreshToolbar(); }
+        else { this.currentAnimation = null; this.busy = false; done?.(); this._refreshToolbar();
+          this._applyPendingBloomOptions(); }
       };
       this.currentAnimation = requestAnimationFrame(tick);
+    }
+    _applyPendingBloomOptions() {
+      if (!this.pendingBloomOptions || !this.ready || this.busy) return;
+      const options = this.pendingBloomOptions;
+      this.pendingBloomOptions = null;
+      this.setBloomOptions(options);
     }
     _moveCamera(from, to, t) {
       this.setCamera(from.k + (to.k - from.k) * t,
@@ -750,15 +860,7 @@
         this.localBaseShift = this.config.localOrigin === "expanded"
           ? { ...this._offset(this.selected) } : { x: 0, y: 0 };
         this._positionLocalLayers();
-        const countBoost = Math.min(1.35, Math.max(0, (this.locals.length - 15) / 55));
-        const spread = clamp(Number(this.config.bloomSpread) || 1, .5, 1.5);
-        computeGeographicExpansion(this.locals, this.selected.__centroid, {
-          scale: 1 + (2.25 + .95 * .95 + countBoost - 1) * spread,
-          radialKick: (10 + .95 * 7 + countBoost * 5) * spread,
-          gap: (4.5 + countBoost * 2.4) * spread, iterations: 240, cleanupIterations: 90,
-          shapeScale: this.config.bloomScale,
-          attraction: .072, maxBearingDrift: .24, offsetProperty: "__baseMunicipalityOffset"
-        });
+        this._computeLocalOffsets();
         this.localRefLayer.replaceChildren(); this.localLineLayer.replaceChildren();
         this.localDotLayer.replaceChildren(); this.localShapeLayer.replaceChildren();
         this.localLabelLayer.replaceChildren();
@@ -806,6 +908,7 @@
         this._positionLocalLayers();
         this.status.textContent = error.message || "Unable to load local geography.";
         this._refreshToolbar();
+        this._applyPendingBloomOptions();
       }
     }
     // All local layers share one translation, including the fixed origin
@@ -1016,6 +1119,7 @@
         if (!d || d.feature !== f || d.pointerId !== e.pointerId) return;
         d.finished = true;
         this.drag = null;
+        this._applyPendingBloomOptions();
         if (d.moved) {
           // Suppress the click immediately following an actual drag.
           f.__suppressClickUntil = performance.now() + 300;
@@ -1130,11 +1234,14 @@
       if (command === "select") this.select(args.id, this.localExpanded && this.locals.some(f => f.__id === args.id || f.__geoid === args.id) ? "local" : "county");
       if (command === "expand") args.level === "local" ? this.expandLocal() : this.expandCounties();
       if (command === "data") {
+        if (Object.prototype.hasOwnProperty.call(args, "valueLabel")) this.config.valueLabel = args.valueLabel;
+        if (Object.prototype.hasOwnProperty.call(args, "valueSuffix")) this.config.valueSuffix = args.valueSuffix;
         this.updateValues(args.rows);
         if (Object.prototype.hasOwnProperty.call(args, "tooltipRows")) {
           this.updateTooltipRows(args.tooltipRows);
         }
       }
+      if (command === "bloom") this.setBloomOptions(args);
       if (command === "reset") this.reset();
     }
     resize() { /* The SVG viewBox is responsive; layout stays in fixed coordinates. */ }
@@ -1142,6 +1249,8 @@
       this.destroyed = true;
       if (this.currentAnimation !== null) cancelAnimationFrame(this.currentAnimation);
       if (this.drag) this.drag = null;
+      this.pendingBloomOptions = null;
+      this.bloomTransition = null;
       instances.delete(this.id);
       if (this.onEscape) this.el.removeEventListener("keydown", this.onEscape);
       this.el.replaceChildren();

@@ -10,7 +10,9 @@ bloom_update_data(
   key = "geoid",
   value,
   tooltip_fields = NULL,
-  tooltip_data = NULL
+  tooltip_data = NULL,
+  value_label = NULL,
+  value_suffix = NULL
 )
 }
 \arguments{
@@ -26,6 +28,12 @@ fields to update alongside the indicator values.}
 \item{tooltip_data}{Optional separate tooltip data frame, using `key` as
 its identifier column. Existing tooltip details are preserved when
 `tooltip_fields` is not supplied.}
+
+\item{value_label}{Optional new legend title (keeps the current title when
+`NULL`). Useful when switching the indicator in a running dashboard.}
+
+\item{value_suffix}{Optional new unit suffix, such as `"%"` or
+`" people/mi2"`; `NULL` preserves the current suffix.}
 }
 \description{
 Update map values without rebuilding geography or resetting positions

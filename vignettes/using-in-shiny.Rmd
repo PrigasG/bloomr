@@ -62,6 +62,33 @@ bloom_update_data(
 
 You can also pass `tooltip_data = details` when descriptions are kept in a separate table. If you omit `tooltip_fields`, the current tooltip details remain unchanged.
 
+If the indicator changes, `bloom_update_data()` can also update the legend title and units:
+
+```{r, eval=FALSE}
+bloom_update_data(bloomProxy("map"), county_data,
+  value = "density", value_label = "Population density",
+  value_suffix = " per sq mi")
+```
+
+## Adjust bloom size without resetting the map
+
+To enlarge expanded areas or change how far they spread, use the same map proxy:
+
+```{r, eval=FALSE}
+bloom_update_bloom(bloomProxy("map"), bloom_scale = 1.5,
+                   bloom_spread = 1.25)
+```
+
+`bloom_scale = 1` is the original shape size, and `1.6` is 60 percent larger. `bloom_spread` changes spacing rather than size. Existing selections and manually dragged positions are retained. In a Shiny dashboard with sliders, debounce rapid changes to avoid unnecessary layout calculations.
+
+For a complete example with a standard map, an adjustable map, ggplot2 bars and Plotly, run:
+
+```{r, eval=FALSE}
+install.packages(c("ggplot2", "plotly"))
+shiny::runApp(system.file("examples", "linked-dashboard", package = "bloomr"))
+```
+
+
 ## Select or expand a region from Shiny
 
 ```{r, eval=FALSE}

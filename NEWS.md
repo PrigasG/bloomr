@@ -16,3 +16,7 @@
 - Choose specific county or local-area IDs with `bloom_areas` while the remaining areas stay in their parent map; use `bloom_color` for a fixed highlight fill.
 - Show the built-in numeric color legend automatically with indicator data, or hide it with `show_legend = FALSE`.
 - Set the widget dimensions, starting map zoom, and bloom spacing independently; add visual examples to the README.
+- Compare original and enlarged blooms in a full county population dashboard with ggplot2 and Plotly.
+- Update bloom size and spacing through `bloom_update_bloom()` without resetting the current map or selected region.
+- Update legend titles and units along with indicators through `bloom_update_data()`.
+- Keep multiple widget instances independent when they share an in-memory geographic source.

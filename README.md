@@ -183,6 +183,17 @@ bloom_map("nj", view = "state_county", bloom_areas = "bergen",
 
 `bloom_scale = 1` is the default. Values up to `1.6` enlarge each moved county or local area around its own center; the layout makes room for them. With many areas, use a taller widget or a smaller scale if the result feels crowded. Origin dots and connectors still point to each area's original position.
 
+To compare the **default size with a visibly larger bloom**, run the complete Shiny dashboard. It places the standard map beside a map starting at `bloom_scale = 1.6` and `bloom_spread = 1.35`, with sliders to change the second map while it is open:
+
+```r
+install.packages(c("ggplot2", "plotly"))  # Only for this example
+shiny::runApp(system.file("examples", "linked-dashboard", package = "bloomr"))
+```
+
+![Same counties at the default and increased Bloom sizes](man/figures/bloom-size-comparison.png)
+
+The dashboard also links county selections to ggplot2 bars and an interactive Plotly scatterplot. `bloom_update_bloom()` lets Shiny update size and spacing **without rebuilding the map**; the first map stays at the original settings for comparison.
+
 Light mode, tooltips, and smooth animations are on by default. Map labels are hidden to keep crowded areas easy to explore. Tooltips show the area's name and indicator, with optional extra fields.
 
 | Option | Default | Purpose |
@@ -246,6 +257,7 @@ Use `tooltip_data` to supply a separate table instead. See [Using your own data]
 - [Two maps in Shiny](https://github.com/PrigasG/bloomr/blob/master/inst/examples/two-maps.R): use independent maps on the same page.
 - [Seamless Shiny map](https://github.com/PrigasG/bloomr/blob/master/inst/examples/seamless-dashboard.R): embed the default map in a dashboard.
 - [Bloom with ggplot2 and Plotly](https://github.com/PrigasG/bloomr/blob/master/inst/examples/coexisting-plots/app.R): show three views of the same data and highlight the selected county.
+- [County population explorer](https://github.com/PrigasG/bloomr/tree/master/inst/examples/linked-dashboard): compare two bloom sizes, adjust them live, and use linked ggplot2 and Plotly charts.
 - [Selective bloom](https://github.com/PrigasG/bloomr/blob/master/inst/examples/selective-bloom.R): move only chosen counties or local areas.
 - [Custom geography example](https://github.com/PrigasG/bloomr/blob/master/inst/examples/custom-geography.R): create a small custom map.
 
