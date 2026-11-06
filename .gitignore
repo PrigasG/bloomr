@@ -9,3 +9,7 @@ Thumbs.db
 .Rproj.user
 .httr-oauth
 .quarto
+/site/
+/doc/
+/Meta/
+/glasstabs_closeread/

@@ -267,16 +267,17 @@
   class BloomMap {
     constructor(el, config) {
       this.el = el;
-      this.config = Object.assign({ geography: "nj", theme: "light", preset: "dashboard", dots: true, connectors: true,
-        overviewBoundaries: true, localBoundaries: true, labels: "none", labelAreas: [],
+      this.config = Object.assign({ geography: "nj", theme: "light", preset: "dashboard", appearance: "card", controls: true, dots: true, connectors: true,
+        overviewBoundaries: true, localBoundaries: true, localOrigin: "original", labels: "none", labelAreas: [],
         draggable: true, duration: 470 }, config || {});
       this.config.labels = ["none", "selected", "all", "custom"].includes(this.config.labels) ? this.config.labels : "none";
+      this.config.localOrigin = this.config.localOrigin === "expanded" ? "expanded" : "original";
       // Geographic IDs are kept as strings, including leading zeros.
       const initialLabels = this.config.labelAreas;
       this.pinnedLabels = new Set((Array.isArray(initialLabels) ? initialLabels :
         initialLabels == null ? [] : [initialLabels]).map(String));
-      this.stateId = this.config.geography === "tx" ? "tx" : "nj";
-      this.meta = configFor(this.stateId);
+      this.stateId = this.config.geography === "custom" ? "custom" : this.config.geography === "tx" ? "tx" : "nj";
+      this.meta = this.config.customMeta || configFor(this.stateId);
       this.id = el.id || `bloomr-${Math.random().toString(36).slice(2)}`;
       this.manualCounty = new Map(); this.manualLocal = new Map();
       this.counties = []; this.locals = [];
@@ -285,8 +286,11 @@
       this.currentAnimation = null; this.drag = null; this.busy = false;
       this.camera = { k: 1, x: 0, y: 0 };
       this.countyCamera = null;
+      this.localBaseShift = { x: 0, y: 0 };
       this.focusCounty = null; this.focusLocal = null;
       this.values = new Map(); this.updateValues(this.config.data || []);
+      this.tooltipDetails = new Map(); this.updateTooltipRows(this.config.tooltipRows || []);
+      this.activeTipKey = null;
       instances.set(this.id, this);
       this._build();
       this._initialize();
@@ -295,6 +299,7 @@
       const el = this.el;
       el.replaceChildren();
       el.classList.add("bloomr-widget");
+      el.dataset.bloomAppearance = this.config.appearance === "seamless" ? "seamless" : "card";
       el.dataset.bloomTheme = this.config.theme === "dark" ? "dark" : this.config.theme === "auto" && global.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
       el.setAttribute("aria-label", "Hierarchical geographic bloom visualization");
       // Escape closes the display menu first, then returns one geography level.
@@ -309,6 +314,7 @@
       el.addEventListener("keydown", this.onEscape);
       this.shell = html("div", "bloomr-shell", el);
       const toolbar = html("div", "bloomr-toolbar", this.shell);
+      toolbar.hidden = !this.config.controls;
       this.title = html("div", "bloomr-title", toolbar, this.meta.name + " Bloom");
       const actions = html("div", "bloomr-actions", toolbar);
       const button = (label, text, action) => {
@@ -318,8 +324,8 @@
         return b;
       };
       this.backButton = button("Return to parent geography", "Back", () => this.back());
-      this.bloomButton = button("Expand counties", "Bloom counties", () => this.expandCounties());
-      this.localButton = button("Expand selected county", "Bloom local areas", () => this.expandLocal());
+      this.bloomButton = button("Expand " + this.meta.countyLabel, "Bloom " + this.meta.countyLabel, () => this.expandCounties());
+      this.localButton = button("Expand selected " + (this.stateId === "custom" ? "region" : "county"), "Bloom " + this.meta.localLabel, () => this.expandLocal());
       button("Zoom in", "+", () => this.zoom(1.3));
       button("Zoom out", "−", () => this.zoom(1 / 1.3));
       button("Reset map view", "Fit", () => this.setCamera(1, 0, 0));
@@ -346,6 +352,14 @@
       };
       this.overviewOption = check("Overview boundaries", "overviewBoundaries", this.config.overviewBoundaries);
       this.localOption = check("Local boundaries", "localBoundaries", this.config.localBoundaries);
+      const originRow = html("label", "bloomr-display-option", this.displayPanel);
+      this.localOriginOption = { row: originRow, control: html("input", "", originRow) };
+      this.localOriginOption.control.type = "checkbox";
+      this.localOriginOption.control.checked = this.config.localOrigin === "expanded";
+      html("span", "", originRow, "Bloom from expanded parent");
+      this.localOriginOption.control.addEventListener("change", () => {
+        this.config.localOrigin = this.localOriginOption.control.checked ? "expanded" : "original";
+      });
       const labelRow = html("label", "bloomr-display-option", this.displayPanel);
       html("span", "", labelRow, "Map labels");
       this.labelSelect = html("select", "bloomr-label-select", labelRow);
@@ -368,8 +382,45 @@
       this.svg = elem("svg", "bloomr-svg", this.stage);
       this.svg.setAttribute("viewBox", `0 0 ${WIDTH} ${HEIGHT}`);
       this.svg.setAttribute("role", "img");
-      this.svg.setAttribute("aria-label", this.meta.name + ": expand the state into counties, then a county into local areas. Original-location dots and dotted connector lines show geographic relationships.");
+      this.svg.setAttribute("aria-label", this.meta.name + ": expand the map into " + this.meta.countyLabel + ", then into " + this.meta.localLabel + ". Original-location dots and dotted connector lines show geographic relationships.");
       this.svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+      // When the full toolbar is hidden, retain only the buttons needed to
+      // navigate on touch screens. Click and keyboard controls still work.
+      this.minimalNav = html("div", "bloomr-minimal-nav", this.stage);
+      this.minimalBack = html("button", "bloomr-button", this.minimalNav, "Back");
+      this.minimalBack.type = "button";
+      this.minimalBack.setAttribute("aria-label", "Return to parent geography");
+      this.minimalBack.addEventListener("click", () => this.back());
+      this.minimalExplore = html("button", "bloomr-button", this.minimalNav, "Explore");
+      this.minimalExplore.type = "button";
+      this.minimalExplore.setAttribute("aria-label", "Explore selected region");
+      this.minimalExplore.addEventListener("click", () => this.expandLocal());
+      this.minimalNav.hidden = true;
+      // With no toolbar, clicking empty map space also opens the overview.
+      this.svg.addEventListener("click", e => {
+        if (!this.config.controls && e.target === this.svg && !this.countyExpanded) {
+          this.expandCounties();
+        }
+      });
+      this.svg.addEventListener("dblclick", e => {
+        if (!this.config.controls && e.target === this.svg) {
+          e.preventDefault();
+          this.back();
+        }
+      });
+      // Ctrl + wheel gives toolbar-free views a zoom gesture, without
+      // swallowing the dashboard's normal mouse-wheel page scrolling.
+      this.svg.addEventListener("wheel", e => {
+        if (this.config.controls || (!e.ctrlKey && !e.metaKey)) return;
+        e.preventDefault();
+        const box = this.svg.getBoundingClientRect();
+        const scale = Math.max(1e-6, Math.min(box.width / WIDTH, box.height / HEIGHT));
+        const mx = (e.clientX - box.left - (box.width - scale * WIDTH) / 2) / scale;
+        const my = (e.clientY - box.top - (box.height - scale * HEIGHT) / 2) / scale;
+        const next = clamp(this.camera.k * (e.deltaY < 0 ? 1.1 : 1 / 1.1), .65, 3.5);
+        this.setCamera(next, mx - (mx - this.camera.x) * next / this.camera.k,
+          my - (my - this.camera.y) * next / this.camera.k);
+      }, { passive: false });
       this.viewport = elem("g", "bloomr-viewport", this.svg);
       this.stateLayer = elem("g", "bloomr-state-layer", this.viewport);
       this.refLayer = elem("g", "bloomr-reference-layer", this.viewport);
@@ -388,7 +439,7 @@
       this.tip.hidden = true;
       this.legend = html("div", "bloomr-legend", this.stage);
       this._updateLegend();
-      this.status = html("div", "bloomr-status", this.shell, "Loading prepared geography...");
+      this.status = html("div", "bloomr-status", this.shell, "Loading geography...");
       this.status.setAttribute("role", "status"); this.status.setAttribute("aria-live", "polite");
       this._refreshToolbar();
     }
@@ -400,10 +451,13 @@
       if (!response.ok) throw Error(`Could not load ${relative} (HTTP ${response.status}).`);
       return response.json();
     }
+    _readGeometry(raw) {
+      return typeof raw === "string" ? JSON.parse(raw) : raw;
+    }
     async _initialize() {
       try {
         const geometry = this.config.inlineGeometry;
-        const [state, counties] = geometry ? [geometry.state, geometry.counties] : await Promise.all([
+        const [state, counties] = geometry ? [this._readGeometry(geometry.state), this._readGeometry(geometry.counties)] : await Promise.all([
           this._getJSON(this.meta.state), this._getJSON(this.meta.counties)
         ]);
         if (this.destroyed) return;
@@ -422,7 +476,7 @@
         this.statePath.setAttribute("d", this.stateInfo.path);
         this.statePath.setAttribute("tabindex", "0");
         this.statePath.setAttribute("role", "button");
-        this.statePath.setAttribute("aria-label", "Expand " + this.meta.name + " into counties");
+        this.statePath.setAttribute("aria-label", "Expand " + this.meta.name + " into " + this.meta.countyLabel);
         this.statePath.addEventListener("click", () => this.expandCounties());
         this.statePath.addEventListener("keydown", e => {
           if (e.key === "Enter" || e.key === " ") { e.preventDefault(); this.expandCounties(); }
@@ -456,6 +510,7 @@
         this._updateBoundaryVisibility();
         this._render(0);
         this._updateLabels();
+        this._updateLegend();
         this.ready = true;
         this._syncKeyboardFocus();
         this.status.textContent = `${this.meta.name} ready. Select Bloom counties to expand the map.`;
@@ -584,11 +639,13 @@
     }
     _updateDisplayHelp() {
       if (!this.displayHelp) return;
-      const isTx = this.stateId === "tx";
-      this.overviewOption.row.querySelector("span").textContent = "Overview: county lines";
-      this.localOption.row.querySelector("span").textContent = `Local: ${isTx ? "subdivision" : "municipality"} lines`;
-      this.overviewOption.row.title = "Show county outlines at their original locations in the state";
-      this.localOption.row.title = `Show ${isTx ? "subdivision" : "municipality"} outlines at their original locations inside the selected county`;
+      const singular = word => ({ counties: "county", municipalities: "municipality",
+        subdivisions: "subdivision", regions: "region", areas: "area" })[word] || word.replace(/s$/, "");
+      this.overviewOption.row.querySelector("span").textContent = `Overview: ${singular(this.meta.countyLabel)} lines`;
+      this.localOption.row.querySelector("span").textContent = `Local: ${singular(this.meta.localLabel)} lines`;
+      this.overviewOption.row.title = "Show region outlines at their original locations in the map";
+      this.localOption.row.title = `Show ${this.meta.localLabel} outlines at their starting locations inside the selected region`;
+      this.localOriginOption.row.title = "Start the local bloom where the parent has expanded or been dragged. Leave off to use its original position.";
       this.displayHelp.textContent = this.config.labels === "custom"
         ? "Shift+click an area, or focus it and press L, to add or remove its label."
         : "Hover over an area for its name. Labels are optional.";
@@ -650,8 +707,9 @@
       this.countyExpanded = true;
       this._animate(this.config.duration, t => this._render(t), () => {
         this._updateLabels();
+        this._updateLegend();
         this._syncKeyboardFocus();
-        this.status.textContent = `${this.counties.length} counties expanded. Select a county to explore ${this.meta.localLabel}.`;
+        this.status.textContent = `${this.counties.length} ${this.meta.countyLabel} expanded. Select a region to explore ${this.meta.localLabel}.`;
       });
       this._refreshToolbar();
     }
@@ -662,10 +720,17 @@
       this._refreshToolbar();
       try {
         const relative = `${this.meta.root}municipalities/${this.selected.__id}.geojson`;
-        const collection = this.config.inlineGeometry?.local?.[this.selected.__id] || await this._getJSON(relative);
+        const inlineLocal = this.config.inlineGeometry?.local?.[this.selected.__id];
+        const collection = inlineLocal ? this._readGeometry(inlineLocal) :
+          (this.stateId === "custom" ? null : await this._getJSON(relative));
         if (this.destroyed || !this.localExpanded) return;
-        if (!Array.isArray(collection?.features)) throw Error("Local-area geometry was incomplete.");
+        if (!Array.isArray(collection?.features)) throw Error("Local-area boundaries could not be loaded.");
         this.locals = collection.features.map(f => this._prepare(f, "local"));
+        // Move the complete local geography as one unit. Keep its own bloom
+        // offsets unchanged so collision spacing and drag offsets are stable.
+        this.localBaseShift = this.config.localOrigin === "expanded"
+          ? { ...this._offset(this.selected) } : { x: 0, y: 0 };
+        this._positionLocalLayers();
         const countBoost = Math.min(1.35, Math.max(0, (this.locals.length - 15) / 55));
         computeGeographicExpansion(this.locals, this.selected.__centroid, {
           scale: 2.25 + .95 * .95 + countBoost,
@@ -710,23 +775,38 @@
           this._moveCamera(this.countyCamera, localCamera, q);
         }, () => {
           this._updateLabels();
+          this._updateLegend();
           this._syncKeyboardFocus();
           this.status.textContent = `${this.selected.__name}: ${this.locals.length} ${this.meta.localLabel} expanded.`;
         });
       } catch (error) {
         this.localExpanded = false;
+        this.localBaseShift = { x: 0, y: 0 };
+        this._positionLocalLayers();
         this.status.textContent = error.message || "Unable to load local geography.";
         this._refreshToolbar();
       }
     }
+    // All local layers share one translation, including the fixed origin
+    // outlines and dotted guides. Local drag offsets remain relative to it.
+    _positionLocalLayers() {
+      const shift = this.localBaseShift || { x: 0, y: 0 };
+      const transform = shift.x || shift.y ? `translate(${shift.x},${shift.y})` : "";
+      [this.localRefLayer, this.localLineLayer, this.localDotLayer,
+        this.localShapeLayer, this.localLabelLayer].forEach(layer => {
+        if (layer) layer.setAttribute("transform", transform);
+      });
+    }
     _localCamera() {
       const f = this.selected;
       if (!f) return { ...this.camera };
-      const xs = [f.__bounds[0][0], f.__bounds[1][0]], ys = [f.__bounds[0][1], f.__bounds[1][1]];
+      const shift = this.localBaseShift || { x: 0, y: 0 };
+      const xs = [f.__bounds[0][0] + shift.x, f.__bounds[1][0] + shift.x];
+      const ys = [f.__bounds[0][1] + shift.y, f.__bounds[1][1] + shift.y];
       this.locals.forEach(l => {
         const o = this._offset(l);
-        xs.push(l.__bounds[0][0] + o.x, l.__bounds[1][0] + o.x);
-        ys.push(l.__bounds[0][1] + o.y, l.__bounds[1][1] + o.y);
+        xs.push(l.__bounds[0][0] + o.x + shift.x, l.__bounds[1][0] + o.x + shift.x);
+        ys.push(l.__bounds[0][1] + o.y + shift.y, l.__bounds[1][1] + o.y + shift.y);
       });
       const left = Math.min(...xs) - 28, right = Math.max(...xs) + 28;
       const top = Math.min(...ys) - 28, bottom = Math.max(...ys) + 28;
@@ -753,13 +833,16 @@
           this.localRefLayer.replaceChildren(); this.localLineLayer.replaceChildren();
           this.localDotLayer.replaceChildren(); this.localShapeLayer.replaceChildren();
           this.localLabelLayer.replaceChildren();
+          this.localBaseShift = { x: 0, y: 0 };
+          this._positionLocalLayers();
           this._restoreCountyAppearance();
           this._updateLabels();
+          this._updateLegend();
           this._render(1);
           this.setCamera(countyCamera.k, countyCamera.x, countyCamera.y);
           this._syncKeyboardFocus();
           if (focusAfter) (this.selected?.pathEl || this.backButton).focus();
-          this.status.textContent = "County view restored.";
+          this.status.textContent = "Parent region view restored.";
           this._refreshToolbar();
         }, easeInOut);
       } else if (this.countyExpanded) {
@@ -767,6 +850,7 @@
           this.countyExpanded = false; this.selected = null; this.focusCounty = null;
           this.counties.forEach(f => f.pathEl.classList.remove("bloomr-selected"));
           this._updateLabels();
+          this._updateLegend();
           this._syncKeyboardFocus();
           if (focusAfter) this.statePath.focus();
           this.status.textContent = this.meta.name + " restored.";
@@ -806,23 +890,51 @@
     }
     _refreshToolbar() {
       if (!this.bloomButton) return;
+      if (this.localOriginOption) this.localOriginOption.control.disabled = !!this.localExpanded || !!this.busy;
       this.backButton.hidden = !(this.countyExpanded || this.localExpanded);
       this.bloomButton.hidden = this.countyExpanded;
       this.localButton.hidden = !(this.countyExpanded && !this.localExpanded && this.selected);
       for (const button of [this.backButton, this.bloomButton, this.localButton]) button.disabled = !!this.busy;
       if (this.localButton && this.selected) this.localButton.textContent = `Bloom ${this.meta.localLabel}`;
+      if (this.minimalNav) {
+        const canBack = this.countyExpanded || this.localExpanded;
+        const canExplore = this.countyExpanded && !this.localExpanded && !!this.selected;
+        this.minimalNav.hidden = !!this.config.controls || (!canBack && !canExplore);
+        this.minimalBack.hidden = !canBack;
+        this.minimalExplore.hidden = !canExplore;
+        this.minimalBack.disabled = this.minimalExplore.disabled = !!this.busy;
+        if (canExplore) this.minimalExplore.textContent = `Explore ${this.meta.localLabel}`;
+      }
     }
     _tooltip(e, f) {
       if (this.drag) return;
-      const v = this.values.get(f.__geoid) ?? this.values.get(f.__id);
-      const number = v === undefined || v === null ? "" : ` · ${Number(v).toLocaleString()}`;
-      this.tip.textContent = `${f.__name}${number}`;
+      const key = this.tooltipDetails.has(f.__geoid) ? f.__geoid : f.__id;
+      // Pointer movement only repositions the existing tooltip, avoiding
+      // repeated DOM rebuilding during ordinary hover movement.
+      if (this.activeTipKey !== key || this.tip.hidden) {
+        this.tip.replaceChildren();
+        const v = this.values.has(f.__geoid) ? this.values.get(f.__geoid) : this.values.get(f.__id);
+        const number = v === undefined || v === null ? "" : ` · ${this._formatValue(v)}`;
+        html("div", "bloomr-tooltip-heading", this.tip, `${f.__name}${number}`);
+        const entries = this.tooltipDetails.get(key) || [];
+        if (entries.length) {
+          const grid = html("div", "bloomr-tooltip-fields", this.tip);
+          entries.forEach(row => {
+            if (!row || row.value == null) return;
+            html("span", "bloomr-tooltip-field-label", grid, String(row.label));
+            html("span", "bloomr-tooltip-field-value", grid, String(row.value));
+          });
+        }
+        this.activeTipKey = key;
+      }
       this.tip.hidden = false;
       const bounds = this.stage.getBoundingClientRect();
-      this.tip.style.left = `${clamp(e.clientX - bounds.left + 12, 6, bounds.width - Math.min(220, this.tip.offsetWidth) - 6)}px`;
-      this.tip.style.top = `${clamp(e.clientY - bounds.top + 12, 6, bounds.height - 45)}px`;
+      const maxX = Math.max(6, bounds.width - this.tip.offsetWidth - 6);
+      const maxY = Math.max(6, bounds.height - this.tip.offsetHeight - 6);
+      this.tip.style.left = `${clamp(e.clientX - bounds.left + 12, 6, maxX)}px`;
+      this.tip.style.top = `${clamp(e.clientY - bounds.top + 12, 6, maxY)}px`;
     }
-    _hideTip() { this.tip.hidden = true; }
+    _hideTip() { if (this.tip) this.tip.hidden = true; this.activeTipKey = null; }
     select(id, level = "county") {
       const pool = level === "local" ? this.locals : this.counties;
       const f = pool.find(f => f.__id === String(id) || f.__geoid === String(id));
@@ -894,20 +1006,38 @@
       this.camera = { k, x, y };
       this.viewport?.setAttribute("transform", `translate(${x},${y}) scale(${k})`);
     }
+    _legendValues() {
+      // Match the actual color domain of the currently visible geography.
+      const pool = this.localExpanded ? this.locals : this.counties;
+      return pool.map(f => this.values.get(this.values.has(f.__geoid) ? f.__geoid : f.__id)).filter(finite);
+    }
+    _formatValue(value) {
+      return Number(value).toLocaleString(undefined, { maximumFractionDigits: 3 }) + (this.config.valueSuffix || "");
+    }
     _updateLegend() {
       if (!this.legend) return;
       this.legend.replaceChildren();
-      const vals = [...this.values.values()].filter(finite);
+      const vals = this._legendValues();
       if (!vals.length) return;
-      const label = html("div", "bloomr-legend-title", this.legend, "Indicator value");
+      const label = html("div", "bloomr-legend-title", this.legend, this.config.valueLabel || "Indicator value");
       label.setAttribute("aria-label", "Numeric indicator color gradient");
       html("div", "bloomr-legend-ramp", this.legend);
       const range = html("div", "bloomr-legend-range", this.legend);
       const min = Math.min(...vals), max = Math.max(...vals);
-      html("span", "", range, min.toLocaleString());
-      html("span", "", range, max.toLocaleString());
+      html("span", "", range, this._formatValue(min));
+      html("span", "", range, this._formatValue(max));
+    }
+    updateTooltipRows(rows) {
+      this.tooltipDetails = new Map();
+      (rows || []).forEach(row => {
+        if (row && row.id != null && Array.isArray(row.fields)) {
+          this.tooltipDetails.set(String(row.id), row.fields);
+        }
+      });
+      this._hideTip();
     }
     updateValues(rows) {
+      this._hideTip();
       this.values = new Map();
       (rows || []).forEach(row => this.values.set(String(row.id), row.value == null ? null : Number(row.value)));
       this._updateLegend();
@@ -926,11 +1056,14 @@
         this.localDotLayer.replaceChildren(); this.localShapeLayer.replaceChildren();
         this.localLabelLayer.replaceChildren();
       }
+      this.localBaseShift = { x: 0, y: 0 };
+      this._positionLocalLayers();
       this.countyExpanded = false; this.selected = null; this.selectedLocal = null;
       this.focusCounty = null; this.focusLocal = null; this.countyCamera = null;
       this.counties.forEach(f => f.pathEl.classList.remove("bloomr-selected"));
       this._restoreCountyAppearance();
       this._render(0); this.setCamera(1, 0, 0);
+      this._updateLegend();
       this._updateLabels();
       this._syncKeyboardFocus();
       this.status.textContent = this.meta.name + " reset."; this._refreshToolbar();
@@ -962,7 +1095,12 @@
     command(command, args) {
       if (command === "select") this.select(args.id, this.localExpanded && this.locals.some(f => f.__id === args.id || f.__geoid === args.id) ? "local" : "county");
       if (command === "expand") args.level === "local" ? this.expandLocal() : this.expandCounties();
-      if (command === "data") this.updateValues(args.rows);
+      if (command === "data") {
+        this.updateValues(args.rows);
+        if (Object.prototype.hasOwnProperty.call(args, "tooltipRows")) {
+          this.updateTooltipRows(args.tooltipRows);
+        }
+      }
       if (command === "reset") this.reset();
     }
     resize() { /* The SVG viewBox is responsive; layout stays in fixed coordinates. */ }
@@ -975,6 +1113,7 @@
       this.el.replaceChildren();
       this.el.classList.remove("bloomr-widget");
       delete this.el.dataset.bloomTheme;
+      delete this.el.dataset.bloomAppearance;
     }
   }
   global.Bloomr = { Map: BloomMap, instances };

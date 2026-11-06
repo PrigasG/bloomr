@@ -1,0 +1,54 @@
+url: https://prigasg.github.io/bloomr/
+title: bloomr
+destination: site
+
+template:
+  bootstrap: 5
+  bslib:
+    bg: "#ffffff"
+    fg: "#243246"
+    primary: "#2563eb"
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    intro:
+      text: Get started
+      href: articles/getting-started.html
+    articles:
+      text: Guides
+      menu:
+        - text: Using your own data
+          href: articles/using-your-own-data.html
+        - text: Using Bloom in Shiny
+          href: articles/using-in-shiny.html
+        - text: Appearance and keyboard
+          href: articles/appearance-and-keyboard.html
+
+reference:
+  - title: Create a map
+    contents:
+      - bloom_map
+      - bloom_check_data
+  - title: Use in Shiny
+    contents:
+      - bloomOutput
+      - renderBloom
+      - bloomProxy
+      - bloom_select
+      - bloom_expand
+      - bloom_reset
+      - bloom_update_data
+  - title: Examples
+    contents:
+      - run_bloom_example
+
+articles:
+  - title: Learn bloomr
+    contents:
+      - getting-started
+      - using-your-own-data
+      - using-in-shiny
+      - appearance-and-keyboard

@@ -5,24 +5,26 @@ Authors@R: person("George", "Arthur", , "prigasgenthian48@gmail.com", role = c("
            comment = c(ORCID = "0000-0002-1975-1459"))
 Description: Creates interactive maps that spread geographic areas apart while
     preserving their original locations with dots and dotted connector lines.
-    Includes prepared New Jersey and Texas geography, with local areas loaded
-    on demand. Supports numeric data, selection, dragging, and updates in Shiny
-    apps and HTML reports. Uses light styling by default with an optional dark theme.
+    Includes prepared New Jersey and Texas examples and accepts custom polygon
+    boundaries through an optional sf interface. Supports numeric indicators,
+    selection, dragging, and reactive Shiny updates. Light styling is the default,
+    with optional dark mode and a portable mode for standalone HTML reports.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 4.1.0)
 Imports:
     htmlwidgets (>= 1.6.0),
-    htmltools (>= 0.5.0),
     jsonlite (>= 1.8.0),
     shiny (>= 1.7.0)
 Suggests:
     testthat (>= 3.0.0),
     knitr,
     rmarkdown,
-    bslib
+    bslib,
+    sf
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 RoxygenNote: 7.3.3
-URL: https://github.com/PrigasG/bloomr
+URL: https://prigasg.github.io/bloomr/, https://github.com/PrigasG/bloomr
 BugReports: https://github.com/PrigasG/bloomr/issues
+Config/Needs/website: pkgdown

@@ -16,6 +16,16 @@ bloom_map()
 
 The map uses a light theme and displays original-location dots, dotted connectors, and the original geographic boundaries. Area names appear on hover. Labels are hidden by default to avoid clutter.
 
+## Fit the map into a dashboard
+
+The map normally appears in a bordered card with a toolbar. For a simpler view:
+
+```{r, eval=FALSE}
+bloom_map(appearance = "seamless", controls = FALSE)
+```
+
+This removes the card border, background, and full toolbar. The Bloom map, dots, connector lines, hover tooltips, and dragging remain. Click the map to bloom, select a region, and double-click it or choose **Explore**. A small **Back** button appears when needed. Ctrl+mouse wheel zooms the map without blocking normal page scrolling.
+
 ## Change the theme or animation
 
 ```{r, eval=FALSE}
@@ -41,6 +51,20 @@ bloom_map(overview_boundaries = FALSE)
 bloom_map(local_boundaries = FALSE)
 ```
 
+## Choose where local areas bloom
+
+By default, local areas bloom from the original position of their parent. To
+start at the parent's current expanded (or dragged) location instead:
+
+```{r, eval=FALSE}
+bloom_map(local_origin = "expanded")
+```
+
+You can also switch **Bloom from expanded parent** in the **Display** menu
+before opening the local view. Either choice keeps the reference boundaries,
+origin dots, and dotted connectors aligned with the local map. Returning to
+the parent uses the same smooth transition.
+
 ## Show a few labels
 
 ```{r, eval=FALSE}
@@ -63,3 +87,14 @@ Use `"selected"` for the selected area, `"all"` for labels with basic overlap fi
 | Escape | Close Display or return to the previous level |
 
 The widget also respects the browser's reduced-motion preference. Keyboard navigation supports selecting regions; moving shapes by keyboard is not available.
+
+## Indicator units
+
+Give the color key a useful title and unit without changing the data:
+
+```{r, eval=FALSE}
+bloom_map("nj", data = rates, value = "rate",
+          value_label = "Screening rate", value_suffix = "%")
+```
+
+The color key follows the values of the current map level.

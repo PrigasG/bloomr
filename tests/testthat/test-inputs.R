@@ -66,3 +66,29 @@ test_that("boundary and label options are available with safe defaults", {
   expect_error(bloom_map("nj", local_boundaries = NA))
   expect_error(bloom_map("nj", label_areas = NA_character_))
 })
+
+
+test_that("card and seamless embedding keep the same map defaults", {
+  normal <- bloom_map("nj")
+  expect_identical(normal$x$appearance, "card")
+  expect_true(normal$x$controls)
+  minimal <- bloom_map("nj", appearance = "seamless", controls = FALSE)
+  expect_identical(minimal$x$appearance, "seamless")
+  expect_false(minimal$x$controls)
+  expect_true(minimal$x$dots)
+  expect_true(minimal$x$connectors)
+  expect_true(minimal$x$draggable)
+  expect_error(bloom_map("nj", appearance = "invalid"), "arg")
+  expect_error(bloom_map("nj", controls = NA), "TRUE or FALSE")
+})
+
+
+test_that("local bloom origin is configurable with original as default", {
+  standard <- bloom_map("nj")
+  expanded <- bloom_map("tx", local_origin = "expanded")
+  expect_identical(standard$x$localOrigin, "original")
+  expect_identical(expanded$x$localOrigin, "expanded")
+  expect_true(expanded$x$dots)
+  expect_true(expanded$x$connectors)
+  expect_error(bloom_map("nj", local_origin = "elsewhere"), "arg")
+})

@@ -1,0 +1,23 @@
+Geographic data sources and notices
+
+The bundled GeoJSON files are simplified visualization copies. They are not
+survey documents or legal boundary descriptions. The bloomr MIT license covers
+package code and documentation; it does not claim ownership of source geography.
+
+New Jersey state, county, and municipal boundaries:
+  Source: New Jersey Office of Information Technology, Office of GIS (NJOGIS).
+  Government Boundaries service:
+  https://maps.nj.gov/arcgis/rest/services/Framework/Government_Boundaries/MapServer
+  Municipal boundaries metadata:
+  https://www.arcgis.com/sharing/rest/content/items/1c6b26a9a14e4132895194e80d6b30f8/info/metadata/metadata.xml?format=default&output=html
+  NJOGIS requests acknowledgement in maps, data, and other products derived
+  from its data. Boundaries are not authoritative for legal or survey use.
+
+Texas state, county, and county subdivision boundaries:
+  Source: U.S. Census Bureau, 2025 TIGER/Line county subdivision shapefiles.
+  https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.2025.html
+  The bundled state and counties were derived by dissolving subdivisions.
+  TIGER/Line® is a registered trademark of the U.S. Census Bureau. Its use here
+  identifies the source data; it does not imply Census Bureau endorsement.
+  Census boundaries are for statistical purposes and are not legal land
+  descriptions. The Census Bureau requests citation when its data are reused.

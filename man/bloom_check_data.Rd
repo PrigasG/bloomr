@@ -2,20 +2,26 @@
 % Please edit documentation in R/bloom_map.R
 \name{bloom_check_data}
 \alias{bloom_check_data}
-\title{Check data before displaying a Bloom map}
+\title{Check numeric data and geographic identifiers}
 \usage{
-bloom_check_data(data, key = "geoid", value)
+bloom_check_data(data, key = "geoid", value, geography = NULL)
 }
 \arguments{
-\item{data}{A data frame.}
+\item{data}{Data frame with geographic identifiers and values.}
 
-\item{key}{Identifier column.}
+\item{key}{Identifier column name.}
 
-\item{value}{Numeric value column.}
+\item{value}{Numeric column name.}
+
+\item{geography}{Optional `"nj"` or `"tx"` for checking ID matches.}
 }
 \value{
-A named list with validation and row count.
+A list with `valid`, `rows`, `missing_values`, and, when
+  geography is given, `matched`, `unmatched`, and `unmatched_ids`.
 }
 \description{
-Check data before displaying a Bloom map
+Check numeric data and geographic identifiers
+}
+\examples{
+bloom_check_data(data.frame(geoid = "34003", rate = 12), value = "rate", geography = "nj")
 }

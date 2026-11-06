@@ -51,6 +51,17 @@ observeEvent(input$metric, {
 
 Here `county_data` is a data frame with a character `geoid` column and numeric indicator columns. Put the code inside the Shiny server and provide a `metric` input.
 
+To update hover details at the same time, add `tooltip_fields` to the proxy call:
+
+```{r, eval=FALSE}
+bloom_update_data(
+  bloomProxy("map"), county_data, value = input$metric,
+  tooltip_fields = c("Population" = "population")
+)
+```
+
+You can also pass `tooltip_data = details` when descriptions are kept in a separate table. If you omit `tooltip_fields`, the current tooltip details remain unchanged.
+
 ## Select or expand a region from Shiny
 
 ```{r, eval=FALSE}

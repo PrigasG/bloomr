@@ -11,6 +11,8 @@ bloom_map(
   value = NULL,
   theme = c("light", "dark", "auto"),
   preset = c("dashboard", "viewer", "studio"),
+  appearance = c("card", "seamless"),
+  controls = TRUE,
   dots = TRUE,
   connectors = TRUE,
   overview_boundaries = TRUE,
@@ -20,13 +22,22 @@ bloom_map(
   draggable = TRUE,
   duration = 470,
   width = NULL,
-  height = "520px"
+  height = "520px",
+  parent = NULL,
+  id = "id",
+  label = "name",
+  value_label = NULL,
+  value_suffix = "",
+  portable = FALSE,
+  tooltip_fields = NULL,
+  tooltip_data = NULL,
+  local_origin = c("original", "expanded")
 )
 }
 \arguments{
-\item{geography}{Either `"nj"` or `"tx"` (case-insensitive).}
+\item{geography}{`"nj"`, `"tx"`, an `sf` polygon object, or a path to a GeoJSON file. For custom boundaries, set `parent` and `id`.}
 
-\item{data}{Optional data frame with geographic identifiers and measured values.}
+\item{data}{Optional data frame with geographic identifiers and measured values. For an `sf` input, a value column may also be read from `geography`.}
 
 \item{key}{Name of the identifier column, such as `"geoid"`.}
 
@@ -36,6 +47,15 @@ bloom_map(
 
 \item{preset}{One of `"dashboard"`, `"viewer"`, or `"studio"`. All three
 retain origin dots and dotted connectors.}
+
+\item{appearance}{`"card"` (default) shows the map in a neat bordered card.
+`"seamless"` removes the card border and background so the map blends into
+its surrounding Shiny dashboard or HTML page. The map itself stays visible.}
+
+\item{controls}{Show the full map toolbar (default `TRUE`). If `FALSE`,
+use the map directly: click to bloom/select, double-click an area to
+explore it, and use small contextual buttons to explore or go back.
+Ctrl+mouse wheel zooms while ordinary scrolling remains available.}
 
 \item{dots, connectors}{Whether to show original geographic anchors and
 connecting guide lines. Both default to `TRUE`.}
@@ -57,7 +77,34 @@ focused area to add or remove its label.}
 
 \item{duration}{Bloom/unbloom duration in milliseconds, default 470.}
 
-\item{height, width}{htmlwidget size, e.g. `"520px"`, `"100%"`.}
+\item{height, width}{Widget dimensions. Accepts pixel sizes or percentage-based widths.}
+
+\item{parent}{Column identifying the parent region for each custom polygon. Required for custom geography.}
+
+\item{id}{Column with unique child-area identifiers in custom geography. Default `"id"`.}
+
+\item{label}{Column with readable child names. Default `"name"`.}
+
+\item{value_label}{Title of a numeric legend; defaults to the value column name.}
+
+\item{value_suffix}{Text added after displayed values, such as a percentage sign.}
+
+\item{portable}{Include all needed geometry inside the widget for saving standalone HTML files. Defaults to `FALSE` for smaller Shiny updates.}
+
+\item{tooltip_fields}{Optional character vector of column names to show below
+the area name and indicator on hover. Use a named vector to give the fields
+readable labels, e.g. `c("Population" = "population")`. By default, the
+tooltip only shows the area name and indicator.}
+
+\item{tooltip_data}{Optional separate data frame for tooltip fields. Uses
+the same identifier column as `key`. Only columns chosen in
+`tooltip_fields` are included. If omitted, fields come from `data`, or
+from the attributes of a custom `sf` geography when `data` is absent.}
+
+\item{local_origin}{Where smaller areas bloom from: `"original"` (default)
+uses the parent's geographic location; `"expanded"` uses its current
+expanded or dragged position. Origin dots, reference lines, and connectors
+stay with the chosen starting location. Change this in the Display menu too.}
 }
 \value{
 An `htmlwidget` suitable for Shiny, Quarto HTML, and R Markdown HTML.

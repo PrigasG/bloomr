@@ -50,9 +50,24 @@ bloom_expand <- function(proxy, level = c("county", "local")) {
 #' @param proxy Result of `bloomProxy()`.
 #' @param data A data.frame with unique geographic identifiers.
 #' @param key,value Column names.
+#' @param tooltip_fields Optional named character vector of additional tooltip
+#'   fields to update alongside the indicator values.
+#' @param tooltip_data Optional separate tooltip data frame, using `key` as
+#'   its identifier column. Existing tooltip details are preserved when
+#'   `tooltip_fields` is not supplied.
 #' @export
-bloom_update_data <- function(proxy, data, key = "geoid", value) {
-  .bloom_command(proxy, "data", list(rows = .bloom_rows(data, key, value)))
+bloom_update_data <- function(proxy, data, key = "geoid", value,
+                              tooltip_fields = NULL, tooltip_data = NULL) {
+  if (!is.null(tooltip_data) && is.null(tooltip_fields)) {
+    stop("Set `tooltip_fields` when providing `tooltip_data`.", call. = FALSE)
+  }
+  args <- list(rows = .bloom_rows(data, key, value))
+  if (!is.null(tooltip_fields)) {
+    args$tooltipRows <- .bloom_tooltip_rows(
+      if (is.null(tooltip_data)) data else tooltip_data, key, tooltip_fields)
+    if (is.null(args$tooltipRows)) args$tooltipRows <- list()
+  }
+  .bloom_command(proxy, "data", args)
 }
 
 #' Return a Bloom map to its initial state

@@ -4,7 +4,14 @@
 \alias{bloom_update_data}
 \title{Update map values without rebuilding geography or resetting positions}
 \usage{
-bloom_update_data(proxy, data, key = "geoid", value)
+bloom_update_data(
+  proxy,
+  data,
+  key = "geoid",
+  value,
+  tooltip_fields = NULL,
+  tooltip_data = NULL
+)
 }
 \arguments{
 \item{proxy}{Result of `bloomProxy()`.}
@@ -12,6 +19,13 @@ bloom_update_data(proxy, data, key = "geoid", value)
 \item{data}{A data.frame with unique geographic identifiers.}
 
 \item{key, value}{Column names.}
+
+\item{tooltip_fields}{Optional named character vector of additional tooltip
+fields to update alongside the indicator values.}
+
+\item{tooltip_data}{Optional separate tooltip data frame, using `key` as
+its identifier column. Existing tooltip details are preserved when
+`tooltip_fields` is not supplied.}
 }
 \description{
 Update map values without rebuilding geography or resetting positions

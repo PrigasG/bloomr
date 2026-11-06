@@ -1,0 +1,123 @@
+---
+title: "Using your own data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using your own data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Add values to an included map
+
+Use one row per geographic area, with a text ID and a numeric value. You do not need a spatial file for this example.
+
+```{r, eval=FALSE}
+library(bloomr)
+
+rates <- data.frame(
+  geoid = c("34003", "34013", "34021"),
+  rate = c(12.5, 18.2, 9.3)
+)
+
+bloom_check_data(rates, value = "rate", geography = "nj")
+
+bloom_map("nj", data = rates, value = "rate",
+          value_label = "Example rate", value_suffix = "%")
+```
+
+Read identifiers as text to keep leading zeros. The data checker reports how many IDs match and lists unmatched IDs. If none match, the map shows a helpful error rather than silently coloring nothing.
+
+## Customize what appears on hover
+
+By default, tooltips show the location name and indicator value. You can add
+other fields, such as population or a short description, without changing map labels.
+
+```{r, eval=FALSE}
+rates$population <- c(953819, 863728, 523053)
+rates$note <- c("Bergen", "Essex", "Mercer")
+
+bloom_map(data = rates, value = "rate",
+          tooltip_fields = c("Population" = "population", "Notes" = "note"))
+```
+
+If the details live in a different table, use `tooltip_data` and select its
+columns with `tooltip_fields`. Both tables need the same geographic ID column.
+
+```{r, eval=FALSE}
+details <- rates[c("geoid", "population", "note")]
+bloom_map(data = rates[c("geoid", "rate")], value = "rate",
+          tooltip_data = details,
+          tooltip_fields = c("Population" = "population", "Notes" = "note"))
+```
+
+Missing values are omitted from the tooltip and numeric details use separators
+for readability. To control a field's exact display, provide it as a formatted
+character column. Plain text is displayed safely; HTML is not interpreted. For custom `sf` maps, fields can also come from the
+spatial object's attributes when no separate `data` is supplied.
+
+## Try a spatial file
+
+A sample GeoJSON file is included so you can try custom geography without finding or preparing another dataset. It contains four parent regions and 24 areas.
+
+```{r, eval=FALSE}
+library(bloomr)
+
+file <- system.file("extdata", "demo-service-areas.geojson", package = "bloomr")
+
+bloom_map(file, parent = "district", id = "area_id", label = "area_name",
+          value = "rate", value_label = "Example rate", value_suffix = "%",
+          tooltip_fields = c("Population" = "population", "Notes" = "note"))
+```
+
+The map starts with all four regions together. Expand them to see the dotted connections, then select a region to explore its areas. This example requires the optional `sf` package.
+
+## Use your own map boundaries
+
+For a custom map, each row is a child area belonging to a parent region. The package combines areas with the same parent into the first-level shapes. You can then bloom those regions to see their child areas.
+
+Your `sf` polygons need three columns: a parent region, a unique area ID, and a readable area name. Column names are up to you.
+
+```{r, eval=FALSE}
+library(sf)
+library(bloomr)
+
+areas <- st_read("my_areas.geojson", quiet = TRUE)
+
+bloom_map(
+  geography = areas,
+  parent = "district_id",
+  id = "area_id",
+  label = "area_name"
+)
+```
+
+You can also pass the GeoJSON path directly as `geography = "my_areas.geojson"`. Custom polygons require `sf`, which is optional for the included maps.
+
+### Show values from the spatial data
+
+If your `sf` object also contains a numeric column, name it in `value`:
+
+```{r, eval=FALSE}
+bloom_map(areas, parent = "district_id", id = "area_id",
+          label = "area_name", value = "rate",
+          value_label = "Example rate", value_suffix = "%")
+```
+
+The map uses the child IDs when matching these values. To color the parent regions instead, provide a separate data frame with one value per parent ID through `data`, `key`, and `value`.
+
+## Save an HTML map to share
+
+Use `portable = TRUE` to include the geography in the widget. This is useful when someone will open the saved file without running Shiny or a local web server.
+
+```{r, eval=FALSE}
+map <- bloom_map("nj", portable = TRUE)
+htmlwidgets::saveWidget(map, "bloom-map.html", selfcontained = TRUE)
+```
+
+`selfcontained = TRUE` requires Pandoc. Portable maps are larger because the geometry is included. Leave `portable = FALSE` for regular Shiny dashboards or web-hosted output, where the packaged files are loaded when needed.
+
+## Common issues
+
+- If an ID does not match, check spelling, case, and leading zeros.
+- For custom maps, IDs must be unique, parent names must be present, and geometries must be polygons with a known coordinate reference system.
+- Custom geometry is projected to WGS84 for browser display. Check highly complex or very large boundaries before publishing.

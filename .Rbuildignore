@@ -5,3 +5,8 @@
 ^docs$
 ^examples$
 ^tests/browser$
+^_pkgdown\.yml$
+^site$
+^doc$
+^Meta$
+^glasstabs_closeread$

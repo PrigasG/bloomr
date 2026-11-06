@@ -37,7 +37,7 @@ rates <- data.frame(
   rate = c(12.5, 18.2, 9.3)
 )
 
-bloom_check_data(rates, value = "rate")
+bloom_check_data(rates, value = "rate", geography = "nj")
 bloom_map("nj", data = rates, key = "geoid", value = "rate")
 ```
 
@@ -59,4 +59,4 @@ Light mode, dots, dotted connectors, and both types of original boundary lines a
 
 ## Supported maps and data
 
-The package includes New Jersey and Texas geography and accepts your own numeric indicator data for these maps. Supplying custom `sf` objects or replacement GeoJSON boundaries is outside the current package interface. HTML reports must be published with their widget dependency files so geographic assets can load.
+The package includes New Jersey and Texas geography and accepts your own numeric indicator data for these maps. You can also bring your own polygon boundaries using an `sf` object or GeoJSON file. See [Using your own data](using-your-own-data.html). For an HTML report that opens independently, use `bloom_map(portable = TRUE)` before saving the widget.
