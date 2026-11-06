@@ -33,6 +33,17 @@ test_that("numeric inputs keep zeros and missing values distinct", {
   expect_null(map$x$data[[2]]$value)
 })
 
+test_that("numeric legend is automatic and can be hidden", {
+  visible <- bloom_map("nj", data = data.frame(geoid = "34003", rate = 12.5),
+                       value = "rate")
+  hidden <- bloom_map("nj", data = data.frame(geoid = "34003", rate = 12.5),
+                      value = "rate", show_legend = FALSE)
+  expect_true(visible$x$showLegend)
+  expect_identical(visible$x$valueLabel, "rate")
+  expect_false(hidden$x$showLegend)
+  expect_error(bloom_map("nj", show_legend = NA), "show_legend")
+})
+
 test_that("invalid columns and IDs give useful errors", {
   expect_error(bloom_map("nj", data = data.frame(geoid = "34003", rate = "a"), value = "rate"), "numeric")
   expect_error(bloom_map("nj", data = data.frame(geoid = NA_character_, rate = 1), value = "rate"), "missing")

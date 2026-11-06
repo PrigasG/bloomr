@@ -269,7 +269,7 @@
       this.el = el;
       this.config = Object.assign({ geography: "nj", theme: "light", preset: "dashboard", appearance: "seamless", controls: false, dots: true, connectors: true,
         overviewBoundaries: true, localBoundaries: true, localOrigin: "original", labels: "none", labelAreas: [],
-        draggable: true, duration: 470 }, config || {});
+        draggable: true, duration: 470, showLegend: true }, config || {});
       if (this.config.bloomAreas != null && !Array.isArray(this.config.bloomAreas)) {
         this.config.bloomAreas = [this.config.bloomAreas];
       }
@@ -1031,6 +1031,7 @@
     _updateLegend() {
       if (!this.legend) return;
       this.legend.replaceChildren();
+      if (!this.config.showLegend) return;
       const vals = this._legendValues();
       if (!vals.length) return;
       const label = html("div", "bloomr-legend-title", this.legend, this.config.valueLabel || "Indicator value");

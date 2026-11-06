@@ -14,3 +14,4 @@
 - Choose whether local regions bloom from the original geographic location or the expanded parent position (`local_origin`).
 - Use `view = "state_county"` to stop at counties or `view = "county_local"` to start with one county and bloom its municipalities or subdivisions.
 - Choose specific county or local-area IDs with `bloom_areas` while the remaining areas stay in their parent map; use `bloom_color` for a fixed highlight fill.
+- Show the built-in numeric color legend automatically with indicator data, or hide it with `show_legend = FALSE`.

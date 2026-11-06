@@ -1,4 +1,4 @@
-# bloomr <img src="man/figures/logo.png" align="right" width="180" alt="bloomr logo">
+# bloomr <img src="man/figures/logo.png" alt="bloomr logo" align="right" width="180"/>
 
 **Interactive maps that keep geography in view.**
 
@@ -37,23 +37,13 @@ library(bloomr)
 bloom_map()
 ```
 
-Click the map or focus it and press **Enter** to bloom counties. Select a county,
-then double-click it, press **Enter** again, or choose **Explore** to see smaller
-areas. Drag an area to move it, hover to see its name, or use **Back** to return.
+Click the map or focus it and press **Enter** to bloom counties. Select a county, then double-click it, press **Enter** again, or choose **Explore** to see smaller areas. Drag an area to move it, hover to see its name, or use **Back** to return.
 
 New Jersey (`"nj"`, the default) and Texas (`"tx"`) are included as ready-to-use examples. You can also use your own polygon boundaries with `sf` or GeoJSON.
 
 To show just one transition, use `bloom_map("nj", view = "state_county")` or `bloom_map("nj", view = "county_local", county = "bergen")`. See the [state-to-county](https://github.com/PrigasG/bloomr/blob/master/inst/examples/state-to-county.R) and [county-to-municipality](https://github.com/PrigasG/bloomr/blob/master/inst/examples/county-to-municipality.R) examples.
 
-To bloom only Bergen County while the other counties stay in the state map:
-
-``` r
-bloom_map("nj", view = "state_county", bloom_areas = "bergen",
-          bloom_color = "#F97316")
-```
-
-For a single municipality, use `view = "county_local"` and give its GEOID in
-`bloom_areas`. See the [selective bloom examples](https://github.com/PrigasG/bloomr/blob/master/inst/examples/selective-bloom.R).
+You can also bloom only chosen areas while the rest stay in the map. See the examples below.
 
 The bundled boundaries are simplified visualization copies. New Jersey geography is credited to the New Jersey Office of Information Technology, Office of GIS; Texas geography is derived from U.S. Census Bureau 2025 TIGER/Line® county subdivisions. See `inst/COPYRIGHTS` for source notices and limitations.
 
@@ -62,6 +52,24 @@ The bundled boundaries are simplified visualization copies. New Jersey geography
 ### Keep the geographic connection
 
 Origin dots, dotted connectors, and the original boundary lines are visible by default. They show where each expanded area belongs.
+
+### Bloom chosen areas
+
+Move only Bergen County while the other counties stay in New Jersey:
+
+``` r
+bloom_map("nj", view = "state_county", bloom_areas = "bergen",
+          bloom_color = "#F97316")
+```
+
+Or move only North Arlington Borough while the other municipalities stay in Bergen County:
+
+``` r
+bloom_map("nj", view = "county_local", county = "bergen",
+          bloom_areas = "3400352320", bloom_color = "#F97316")
+```
+
+`bloom_areas` accepts one or several area IDs or GEOIDs. Omit it to bloom every area. `bloom_color` is optional; without it, the usual data or default colors apply. The [selective bloom example](https://github.com/PrigasG/bloomr/blob/master/inst/examples/selective-bloom.R) shows both levels with indicator data.
 
 ### Color the map with your data
 
@@ -77,6 +85,14 @@ bloom_map(data = rates, key = "geoid", value = "rate")
 ```
 
 Keep geographic IDs as text so leading zeros are preserved. Check IDs before drawing the map with `bloom_check_data(rates, value = "rate", geography = "nj")`. Missing and unmatched areas are reported separately.
+
+The numeric color legend is built into `bloomr`. It appears when the displayed level has numeric values, and `value_label` and `value_suffix` control its text. Hide it with `show_legend = FALSE`:
+
+``` r
+bloom_map(data = rates, key = "geoid", value = "rate", show_legend = FALSE)
+```
+
+No legend appears when there are no numeric values. The optional fixed `bloom_color` is separate from the numeric legend.
 
 ### Use your own boundaries
 
@@ -121,16 +137,13 @@ shiny::runApp(system.file("examples", "coexisting-plots", package = "bloomr"))
 
 ## Customization
 
-The default is just the map, with no surrounding card or full toolbar. To show
-the bordered card and full toolbar:
+The default is just the map, with no surrounding card or full toolbar. To show the bordered card and full toolbar:
 
 ``` r
 bloom_map(appearance = "card", controls = TRUE)
 ```
 
-With the default, a small **Explore** or **Back** button appears when needed.
-Use Ctrl+mouse wheel to zoom, or press Escape to return. Normal page scrolling
-still works.
+With the default, a small **Explore** or **Back** button appears when needed. Use Ctrl+mouse wheel to zoom, or press Escape to return. Normal page scrolling still works.
 
 Light mode, tooltips, and smooth animations are on by default. Map labels are hidden to keep crowded areas easy to explore. Tooltips show the area's name and indicator, with optional extra fields.
 
@@ -141,6 +154,7 @@ Light mode, tooltips, and smooth animations are on by default. Map labels are hi
 | `controls` | `FALSE` | Direct mouse and keyboard navigation or full toolbar |
 | `bloom_areas` | `NULL` | IDs or GEOIDs to move; all areas when omitted |
 | `bloom_color` | `NULL` | Fixed fill color for the moved areas |
+| `show_legend` | `TRUE` | Show the numeric legend when values are available |
 | `labels` | `"none"` | No labels, selected area, chosen areas, or non-overlapping labels |
 | `dots` | `TRUE` | Show original locations |
 | `connectors` | `TRUE` | Link expanded areas to their origins |

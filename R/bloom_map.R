@@ -49,6 +49,9 @@
 #' @param id Column with unique child-area identifiers in custom geography. Default `"id"`.
 #' @param label Column with readable child names. Default `"name"`.
 #' @param value_label Title of a numeric legend; defaults to the value column name.
+#' @param show_legend Show the numeric color legend when indicator values are
+#'   available (default `TRUE`). Set `FALSE` to hide it. A fixed `bloom_color`
+#'   is not represented by this numeric legend.
 #' @param value_suffix Text added after displayed values, such as a percentage sign.
 #' @param portable Include all needed geometry inside the widget for saving standalone HTML files. Defaults to `FALSE` for smaller Shiny updates.
 #' @param tooltip_fields Optional character vector of column names to show below
@@ -81,7 +84,8 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
                       label_areas = character(), draggable = TRUE,
                       duration = 470, width = NULL, height = "520px",
                       parent = NULL, id = "id", label = "name",
-                      value_label = NULL, value_suffix = "", portable = FALSE,
+                      value_label = NULL, value_suffix = "", show_legend = TRUE,
+                      portable = FALSE,
                       tooltip_fields = NULL, tooltip_data = NULL,
                       local_origin = c("original", "expanded")) {
   if (!is.null(tooltip_data) && is.null(tooltip_fields)) {
@@ -158,6 +162,7 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
     stop("`duration` must be one nonnegative number.", call. = FALSE)
   }
   flags <- list(controls = controls, dots = dots, connectors = connectors, draggable = draggable,
+                show_legend = show_legend,
                 overview_boundaries = overview_boundaries,
                 local_boundaries = local_boundaries)
   for (name in names(flags)) {
@@ -223,6 +228,7 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
              maxLevel = if (view == "full") "local" else "county",
              customMeta = if (!is.null(view_meta)) view_meta else if (geography == "custom") attr(prepared, "meta") else NULL,
              valueLabel = value_label %||b% value %||b% "Indicator value",
+             showLegend = show_legend,
              valueSuffix = value_suffix),
     width = width, height = height, package = "bloomr"
   )

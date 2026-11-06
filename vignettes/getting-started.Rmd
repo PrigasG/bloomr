@@ -85,6 +85,17 @@ bloom_map("nj", data = rates, key = "geoid", value = "rate")
 
 Keep IDs such as GEOIDs as character strings to preserve leading zeros. Areas with no matched value remain distinct from areas with numeric values.
 
+The numeric color legend is part of `bloomr` and appears automatically when
+the displayed level has numeric values. Use `value_label` and `value_suffix`
+to change its text, or hide it:
+
+```{r, eval=FALSE}
+bloom_map("nj", data = rates, value = "rate", show_legend = FALSE)
+```
+
+With no numeric values, no numeric legend appears. A fixed `bloom_color`
+highlights the moved shape but is not shown in the numeric legend.
+
 ## Choose the appearance
 
 ```{r, eval=FALSE}

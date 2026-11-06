@@ -32,6 +32,7 @@ bloom_map(
   label = "name",
   value_label = NULL,
   value_suffix = "",
+  show_legend = TRUE,
   portable = FALSE,
   tooltip_fields = NULL,
   tooltip_data = NULL,
@@ -107,6 +108,10 @@ focused area to add or remove its label.}
 \item{value_label}{Title of a numeric legend; defaults to the value column name.}
 
 \item{value_suffix}{Text added after displayed values, such as a percentage sign.}
+
+\item{show_legend}{Show the numeric color legend when indicator values are
+available (default `TRUE`). Set `FALSE` to hide it. A fixed `bloom_color`
+is not represented by this numeric legend.}
 
 \item{portable}{Include all needed geometry inside the widget for saving standalone HTML files. Defaults to `FALSE` for smaller Shiny updates.}
 

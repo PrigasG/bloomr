@@ -8,3 +8,11 @@ county_rates <- data.frame(
 
 bloom_map("nj", view = "state_county", data = county_rates, value = "rate",
           value_label = "Example county rate", value_suffix = "%")
+
+# Move only Bergen County; the other counties keep the state map intact.
+bloom_map("nj", view = "state_county", bloom_areas = "bergen",
+          bloom_color = "#F97316")
+
+# Hide the built-in numeric legend when displaying indicator data.
+bloom_map("nj", view = "state_county", data = county_rates, value = "rate",
+          show_legend = FALSE)
