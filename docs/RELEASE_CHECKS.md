@@ -13,6 +13,9 @@ R CMD check --as-cran bloomr_0.1.0.tar.gz
 
 The check should finish with zero errors and zero warnings. Review and resolve notes that affect the release. These commands avoid the separate Windows Quarto environment-argument issue sometimes seen in `devtools::check()` reporting.
 
+The GitHub Actions check matrix also runs the current R release on Windows,
+macOS, and Linux and R-devel on Linux. Review all four jobs before submitting.
+
 From within the package project, also run:
 
 ```r
