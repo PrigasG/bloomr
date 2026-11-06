@@ -161,6 +161,18 @@ bloom_map(appearance = "card", controls = TRUE)
 
 With the default, a small **Explore** or **Back** button appears when needed. Use Ctrl+mouse wheel to zoom, or press Escape to return. Normal page scrolling still works.
 
+To match a dashboard's colors, use a small `style` list. Only the fields you set override the light, dark, or automatic theme:
+
+``` r
+bloom_map("nj", style = list(
+  connector_color = "#3B82F6",
+  bloom_outline_color = "#1D4ED8",
+  bloom_outline_width = 2.5
+))
+```
+
+The Bloom outline applies to moved shapes; original boundaries and stationary areas keep their own outlines. See [Appearance and keyboard controls](https://prigasg.github.io/bloomr/articles/appearance-and-keyboard.html) for the other outline, dot, and connector options.
+
 ### Size and spacing
 
 Set `width` and `height` for the widget, `map_zoom` for the starting size of the entire map, and `bloom_spread` for how far areas move apart:
@@ -185,7 +197,7 @@ bloom_map("nj", view = "state_county", bloom_areas = "bergen",
 
 To compare the **default size with a visibly larger bloom**, run the complete Shiny dashboard. It places the standard map beside a map starting at `bloom_scale = 1.6` and `bloom_spread = 1.35`, with sliders to change the second map while it is open:
 
-```r
+``` r
 install.packages(c("ggplot2", "plotly"))  # Only for this example
 shiny::runApp(system.file("examples", "linked-dashboard", package = "bloomr"))
 ```

@@ -74,6 +74,16 @@
 #' @param bloom_scale Size of moved areas relative to their original shapes,
 #'   from `1` to `1.6` (default `1`). The parent map and areas left in place
 #'   retain their original size. Larger values may need a taller widget.
+#' @param style Optional named list of visual overrides. Colors use hexadecimal
+#'   values, such as `"#2563EB"`. Available keys are
+#'   `parent_outline_color`, `parent_outline_width`,
+#'   `bloom_outline_color`, `bloom_outline_width`, `reference_color`,
+#'   `reference_width`, `connector_color`, `connector_width`,
+#'   `connector_pattern` (`"dotted"`, `"dashed"`, or `"solid"`),
+#'   `connector_opacity`, `dot_color`, `dot_size`,
+#'   `selected_outline_color`, and `selected_outline_width`.
+#'   Widths range from `0.5` to `6`, dot size from `1` to `10`, and opacity
+#'   from `0` to `1`. `NULL` (default) or `list()` keeps the theme defaults.
 #' @return An `htmlwidget` suitable for Shiny, Quarto HTML, and R Markdown HTML.
 #' @examples
 #' bloom_map("nj")
@@ -98,7 +108,7 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
                       portable = FALSE,
                       tooltip_fields = NULL, tooltip_data = NULL,
                       local_origin = c("original", "expanded"),
-                      bloom_scale = 1) {
+                      bloom_scale = 1, style = NULL) {
   if (!is.null(tooltip_data) && is.null(tooltip_fields)) {
     stop("Set `tooltip_fields` to choose which tooltip columns to show.", call. = FALSE)
   }
@@ -184,6 +194,7 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
       bloom_scale < 1 || bloom_scale > 1.6) {
     stop("`bloom_scale` must be one number from 1 to 1.6.", call. = FALSE)
   }
+  style <- .bloom_style(style)
   flags <- list(controls = controls, dots = dots, connectors = connectors, draggable = draggable,
                 show_legend = show_legend,
                 overview_boundaries = overview_boundaries,
@@ -249,6 +260,7 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
              draggable = draggable, duration = as.numeric(duration),
              mapZoom = as.numeric(map_zoom), bloomSpread = as.numeric(bloom_spread),
              bloomScale = as.numeric(bloom_scale),
+             style = style,
              data = rows, tooltipRows = tooltip_rows, inlineGeometry = prepared,
              maxLevel = if (view == "full") "local" else "county",
              customMeta = if (!is.null(view_meta)) view_meta else if (geography == "custom") attr(prepared, "meta") else NULL,
@@ -257,6 +269,48 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
              valueSuffix = value_suffix),
     width = width, height = height, package = "bloomr"
   )
+}
+
+.bloom_style <- function(style) {
+  if (is.null(style)) return(NULL)
+  if (!is.list(style) || (length(style) &&
+      (is.null(names(style)) || anyNA(names(style)) ||
+       any(!nzchar(names(style))) || anyDuplicated(names(style)) > 0L))) {
+    stop("`style` must be a named list with unique, nonempty keys.", call. = FALSE)
+  }
+  if (!length(style)) return(NULL)
+  colors <- c("parent_outline_color", "bloom_outline_color", "reference_color",
+              "connector_color", "dot_color", "selected_outline_color")
+  widths <- c("parent_outline_width", "bloom_outline_width", "reference_width",
+              "connector_width", "selected_outline_width")
+  allowed <- c(colors, widths, "connector_pattern", "connector_opacity", "dot_size")
+  unknown <- setdiff(names(style), allowed)
+  if (length(unknown)) {
+    stop("Unknown `style` key: ", paste(unknown, collapse = ", "), call. = FALSE)
+  }
+  for (key in names(style)) {
+    value <- style[[key]]
+    if (key %in% colors) {
+      if (!is.character(value) || length(value) != 1L || is.na(value) ||
+          !grepl("^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$", value)) {
+        stop("`style$", key, "` must be a hexadecimal color such as '#2563EB'.", call. = FALSE)
+      }
+    } else if (key == "connector_pattern") {
+      if (!is.character(value) || length(value) != 1L || is.na(value) ||
+          !value %in% c("dotted", "dashed", "solid")) {
+        stop("`style$connector_pattern` must be 'dotted', 'dashed', or 'solid'.", call. = FALSE)
+      }
+    } else {
+      low <- if (key == "connector_opacity") 0 else if (key == "dot_size") 1 else 0.5
+      high <- if (key == "connector_opacity") 1 else if (key == "dot_size") 10 else 6
+      if (!is.numeric(value) || length(value) != 1L || !is.finite(value) ||
+          value < low || value > high) {
+        stop("`style$", key, "` must be one number from ", low, " to ", high, ".", call. = FALSE)
+      }
+      style[[key]] <- as.numeric(value)
+    }
+  }
+  style
 }
 
 .bloom_feature_ids <- function(raw) {

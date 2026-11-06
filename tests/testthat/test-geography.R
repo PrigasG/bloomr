@@ -65,8 +65,10 @@ test_that("example spatial GeoJSON has the required fields and polygons", {
   expect_true(all(c("area_id", "area_name", "district", "rate") %in% names(areas)))
   expect_true(all(sf::st_is_valid(areas)))
   map <- bloom_map(f, parent = "district", id = "area_id",
-                   label = "area_name", value = "rate")
+                   label = "area_name", value = "rate",
+                   style = list(reference_color = "#94A3B8", connector_pattern = "solid"))
   expect_identical(map$x$geography, "custom")
   expect_length(map$x$data, 24L)
   expect_length(map$x$inlineGeometry$local, 4L)
+  expect_identical(map$x$style$connector_pattern, "solid")
 })

@@ -32,6 +32,7 @@ map.counties = [{ __id:'north', __geoid:'north' }, { __id:'south', __geoid:'sout
 map.locals = [{ __id:'N1', __geoid:'N1' }, { __id:'N2', __geoid:'N2' }];
 map.values = new Map([['north',100],['south',200],['N1',10],['N2',20]]);
 map.config = { valueSuffix:'%' };
+map.visualStyle = {};
 map.localExpanded = false;
 assert.deepEqual(Array.from(map._legendValues()),[100,200]);
 map.localExpanded = true;

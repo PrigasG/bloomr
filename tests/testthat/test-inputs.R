@@ -121,3 +121,26 @@ test_that("local bloom origin is configurable with original as default", {
   expect_true(expanded$x$connectors)
   expect_error(bloom_map("nj", local_origin = "elsewhere"), "arg")
 })
+
+test_that("optional visual styles are validated and do not change defaults", {
+  expect_null(bloom_map("nj")$x$style)
+  expect_null(bloom_map("nj", style = list())$x$style)
+  custom <- bloom_map("nj", style = list(
+    parent_outline_color = "#64748B", bloom_outline_width = 2.5,
+    connector_pattern = "dashed", connector_opacity = 0.6,
+    dot_color = "#2563EB", dot_size = 4,
+    selected_outline_width = 3
+  ))
+  expect_identical(custom$x$style$parent_outline_color, "#64748B")
+  expect_identical(custom$x$style$bloom_outline_width, 2.5)
+  expect_identical(custom$x$style$connector_pattern, "dashed")
+  expect_error(bloom_map("nj", style = "blue"), "named list")
+  expect_error(bloom_map("nj", style = list("#123456")), "named list")
+  expect_error(bloom_map("nj", style = list(dot_color = "red")), "dot_color")
+  expect_error(bloom_map("nj", style = list(dot_size = 11)), "dot_size")
+  expect_error(bloom_map("nj", style = list(reference_width = NA_real_)), "reference_width")
+  expect_error(bloom_map("nj", style = list(connector_opacity = 1.2)), "connector_opacity")
+  expect_error(bloom_map("nj", style = list(connector_pattern = "wavy")), "connector_pattern")
+  expect_error(bloom_map("nj", style = list(other = 1)), "Unknown")
+  expect_error(bloom_map("nj", style = structure(list(1, 2), names = c("dot_size", "dot_size"))), "unique")
+})

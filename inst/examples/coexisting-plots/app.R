@@ -70,7 +70,11 @@ server <- function(input, output, session) {
       geography = "nj", data = counties, key = "geoid", value = "density",
       value_label = "Population density", value_suffix = " people/mi²",
       tooltip_fields = c("Population" = "population"),
-      appearance = "seamless", controls = FALSE
+      appearance = "seamless", controls = FALSE,
+      style = list(bloom_outline_color = "#2C6FA8",
+                   bloom_outline_width = 2,
+                   connector_color = "#64748B", dot_color = "#2563EB",
+                   selected_outline_color = "#2563EB")
     )
   })
 

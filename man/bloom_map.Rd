@@ -39,7 +39,8 @@ bloom_map(
   tooltip_fields = NULL,
   tooltip_data = NULL,
   local_origin = c("original", "expanded"),
-  bloom_scale = 1
+  bloom_scale = 1,
+  style = NULL
 )
 }
 \arguments{
@@ -144,6 +145,17 @@ stay with the chosen starting location. Change this in the Display menu too.}
 \item{bloom_scale}{Size of moved areas relative to their original shapes,
 from `1` to `1.6` (default `1`). The parent map and areas left in place
 retain their original size. Larger values may need a taller widget.}
+
+\item{style}{Optional named list of visual overrides. Colors use hexadecimal
+values, such as `"#2563EB"`. Available keys are
+`parent_outline_color`, `parent_outline_width`,
+`bloom_outline_color`, `bloom_outline_width`, `reference_color`,
+`reference_width`, `connector_color`, `connector_width`,
+`connector_pattern` (`"dotted"`, `"dashed"`, or `"solid"`),
+`connector_opacity`, `dot_color`, `dot_size`,
+`selected_outline_color`, and `selected_outline_width`.
+Widths range from `0.5` to `6`, dot size from `1` to `10`, and opacity
+from `0` to `1`. `NULL` (default) or `list()` keeps the theme defaults.}
 }
 \value{
 An `htmlwidget` suitable for Shiny, Quarto HTML, and R Markdown HTML.

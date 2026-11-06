@@ -16,6 +16,36 @@ bloom_map()
 
 The map has no surrounding card or full toolbar. It uses a light theme and displays original-location dots, dotted connectors, and the original geographic boundaries. Area names appear on hover. Labels are hidden by default to avoid clutter.
 
+## Match a dashboard's style
+
+Use `style` to override only the visual details you need. The same list works
+with bundled or custom geography and with `theme = "light"`, `"dark"`, or
+`"auto"`:
+
+```{r, eval=FALSE}
+bloom_map("nj", theme = "light", style = list(
+  bloom_outline_color = "#1D4ED8", bloom_outline_width = 2.5,
+  connector_color = "#3B82F6", connector_pattern = "dashed"
+))
+bloom_map("nj", theme = "dark", style = list(
+  bloom_outline_color = "#93C5FD", dot_color = "#BFDBFE"
+))
+```
+
+| Layer | Keys in `style` | Where it appears |
+| --- | --- | --- |
+| Parent outline | `parent_outline_color`, `parent_outline_width` | State or current county silhouette |
+| Bloom outline | `bloom_outline_color`, `bloom_outline_width` | Only shapes that move outward |
+| Reference boundaries | `reference_color`, `reference_width` | Original internal divisions |
+| Connectors | `connector_color`, `connector_width`, `connector_pattern`, `connector_opacity` | Guides from original positions to moved shapes |
+| Origin dots | `dot_color`, `dot_size` | Original positions |
+| Selected outline | `selected_outline_color`, `selected_outline_width` | Currently selected shape |
+
+Colors use hex values such as `"#2563EB"`; widths can be `0.5` to `6`, dot
+size `1` to `10`, and connector opacity `0` to `1`. Connector patterns are
+`"dotted"`, `"dashed"`, and `"solid"`. An omitted key uses the current theme.
+`style = NULL` and `style = list()` retain the original appearance.
+
 ## Add a card and toolbar when useful
 
 The map-only view fits directly into a dashboard or report. To show a bordered

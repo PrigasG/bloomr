@@ -6,7 +6,7 @@ bloom_map("nj", view = "state_county", bloom_areas = "bergen",
 
 # Make the moved county the focus without enlarging the state map.
 bloom_map("nj", view = "state_county", bloom_areas = "bergen",
-          bloom_color = "#F97316", bloom_scale = 1.35)
+          bloom_color = "#F97316", bloom_scale = 1.5)
 
 # Bloom only North Arlington Borough from the Bergen County map.
 # IDs or GEOIDs can be used in bloom_areas.

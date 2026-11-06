@@ -276,6 +276,7 @@
       }
       this.config.labels = ["none", "selected", "all", "custom"].includes(this.config.labels) ? this.config.labels : "none";
       this.config.localOrigin = this.config.localOrigin === "expanded" ? "expanded" : "original";
+      this.visualStyle = this.config.style || {};
       // Geographic IDs are kept as strings, including leading zeros.
       const initialLabels = this.config.labelAreas;
       this.pinnedLabels = new Set((Array.isArray(initialLabels) ? initialLabels :
@@ -305,6 +306,31 @@
       el.classList.add("bloomr-widget");
       el.dataset.bloomAppearance = this.config.appearance === "seamless" ? "seamless" : "card";
       el.dataset.bloomTheme = this.config.theme === "dark" ? "dark" : this.config.theme === "auto" && global.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      const styleVariables = {
+        parent_outline_color: "--bloom-parent-outline-color",
+        parent_outline_width: "--bloom-parent-outline-width",
+        bloom_outline_color: "--bloom-bloom-outline-color",
+        bloom_outline_width: "--bloom-bloom-outline-width",
+        reference_color: "--bloom-reference-color",
+        reference_width: "--bloom-reference-width",
+        connector_color: "--bloom-connector-color",
+        connector_width: "--bloom-connector-width",
+        dot_color: "--bloom-dot-color",
+        selected_outline_color: "--bloom-selected-outline-color",
+        selected_outline_width: "--bloom-selected-outline-width"
+      };
+      this.styleProperties = [];
+      Object.entries(styleVariables).forEach(([key, property]) => {
+        if (this.visualStyle[key] === undefined) return;
+        const value = key.endsWith("_width") ? `${this.visualStyle[key]}px` : this.visualStyle[key];
+        el.style.setProperty(property, value);
+        this.styleProperties.push(property);
+      });
+      if (this.visualStyle.connector_pattern) {
+        const dash = { dotted: "2.5 5.5", dashed: "8 5", solid: "none" }[this.visualStyle.connector_pattern];
+        el.style.setProperty("--bloom-connector-dash", dash);
+        this.styleProperties.push("--bloom-connector-dash");
+      }
       el.setAttribute("aria-label", "Hierarchical geographic bloom visualization");
       // Escape closes the display menu first, then returns one geography level.
       this.onEscape = e => {
@@ -637,6 +663,9 @@
         this.config.bloomAreas.includes(f.__id) || this.config.bloomAreas.includes(f.__geoid);
       return f;
     }
+    _setMovedClasses(features, expanded) {
+      features.forEach(f => f.pathEl?.classList.toggle("bloomr-moved", expanded && f.__bloom !== false));
+    }
     _color(f, level, index) {
       if (level === "county" && f.__bloom && this.config.bloomColor) return this.config.bloomColor;
       const key = this.values.has(f.__geoid) ? f.__geoid : f.__id;
@@ -681,12 +710,13 @@
       if (f.trail) {
         const sx = f.__centroid[0], sy = f.__centroid[1];
         f.trail.setAttribute("d", curvedTrail(sx, sy, sx + dx, sy + dy));
-        f.trail.setAttribute("opacity", this.config.connectors && movedProgress > 0 ? .75 : 0);
+        f.trail.setAttribute("opacity", this.config.connectors && movedProgress > 0
+          ? (this.visualStyle.connector_opacity ?? .75) : 0);
         f.trail.style.display = this.config.connectors ? "" : "none";
       }
       if (f.dot) {
         f.dot.setAttribute("cx", f.__centroid[0]); f.dot.setAttribute("cy", f.__centroid[1]);
-        f.dot.setAttribute("r", f.__level === "county" ? "3.1" : "2.5");
+        f.dot.setAttribute("r", this.visualStyle.dot_size ?? (f.__level === "county" ? 3.1 : 2.5));
         f.dot.setAttribute("opacity", this.config.dots && movedProgress > 0 ? .85 : 0);
         f.dot.style.display = this.config.dots ? "" : "none";
       }
@@ -833,6 +863,7 @@
     expandCounties() {
       if (!this.ready || this.busy || this.countyExpanded) return;
       this.countyExpanded = true;
+      this._setMovedClasses(this.counties, true);
       this._animate(this.config.duration, t => this._render(t), () => {
         this._updateLabels();
         this._updateLegend();
@@ -845,6 +876,7 @@
       if (this.config.maxLevel === "county") return;
       if (!this.ready || this.busy || !this.countyExpanded || !this.selected || this.localExpanded) return;
       this.localExpanded = true;
+      this.selected.pathEl.classList.add("bloomr-parent-context");
       this.status.textContent = `Loading ${this.selected.__name} ${this.meta.localLabel}...`;
       this._refreshToolbar();
       try {
@@ -887,6 +919,7 @@
           this._attachDrag(f, "local");
           this._makeLabel(f, this.localLabelLayer);
         });
+        this._setMovedClasses(this.locals, true);
         this._updateBoundaryVisibility();
         this._updateLabels();
         this.countyCamera = { ...this.camera };
@@ -904,6 +937,7 @@
         });
       } catch (error) {
         this.localExpanded = false;
+        this.selected?.pathEl.classList.remove("bloomr-parent-context");
         this.localBaseShift = { x: 0, y: 0 };
         this._positionLocalLayers();
         this.status.textContent = error.message || "Unable to load local geography.";
@@ -959,6 +993,7 @@
           this._moveCamera(localCamera, countyCamera, t);
         }, () => {
           this.localExpanded = false; this.selectedLocal = null; this.locals = [];
+          this.selected?.pathEl.classList.remove("bloomr-parent-context");
           this.localRefLayer.replaceChildren(); this.localLineLayer.replaceChildren();
           this.localDotLayer.replaceChildren(); this.localShapeLayer.replaceChildren();
           this.localLabelLayer.replaceChildren();
@@ -977,7 +1012,7 @@
       } else if (this.countyExpanded) {
         this._animate(this.config.duration, t => this._render(1 - t), () => {
           this.countyExpanded = false; this.selected = null; this.focusCounty = null;
-          this.counties.forEach(f => f.pathEl.classList.remove("bloomr-selected"));
+          this.counties.forEach(f => f.pathEl.classList.remove("bloomr-selected", "bloomr-moved"));
           this._updateLabels();
           this._updateLegend();
           this._syncKeyboardFocus();
@@ -1198,7 +1233,7 @@
       this._positionLocalLayers();
       this.countyExpanded = false; this.selected = null; this.selectedLocal = null;
       this.focusCounty = null; this.focusLocal = null; this.countyCamera = null;
-      this.counties.forEach(f => f.pathEl.classList.remove("bloomr-selected"));
+      this.counties.forEach(f => f.pathEl.classList.remove("bloomr-selected", "bloomr-moved", "bloomr-parent-context"));
       this._restoreCountyAppearance();
       this._render(0); this._resetCamera();
       this._updateLegend();
@@ -1257,6 +1292,7 @@
       this.el.classList.remove("bloomr-widget");
       delete this.el.dataset.bloomTheme;
       delete this.el.dataset.bloomAppearance;
+      this.styleProperties?.forEach(property => this.el.style.removeProperty(property));
     }
   }
   global.Bloomr = { Map: BloomMap, instances };

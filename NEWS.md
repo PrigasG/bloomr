@@ -20,3 +20,4 @@
 - Update bloom size and spacing through `bloom_update_bloom()` without resetting the current map or selected region.
 - Update legend titles and units along with indicators through `bloom_update_data()`.
 - Keep multiple widget instances independent when they share an in-memory geographic source.
+- Optionally style parent, moved, reference, and selected outlines, connectors, and origin dots with one `style` list.
