@@ -1,10 +1,17 @@
 # bloomr
 
+<img src="man/figures/logo.png" align="right" width="180" alt="bloomr logo">
+
 **Interactive maps that keep geography in view.**
 
 [Website](https://prigasg.github.io/bloomr/) · [Get started](https://prigasg.github.io/bloomr/articles/getting-started.html) · [Function reference](https://prigasg.github.io/bloomr/reference/index.html)
 
 `bloomr` spreads geographic areas apart so you can explore them without losing their original locations. Dots and dotted lines connect each area to its position on the map. Use it in R, an HTML report, or a Shiny dashboard, with no JavaScript or CSS setup.
+
+If you know [dragmapr](https://CRAN.R-project.org/package=dragmapr) or
+[explodemap](https://CRAN.R-project.org/package=explodemap), those packages
+explore related ways to move geographic areas for display. `bloomr` focuses on
+interactive parent-to-child expansion with visible origin dots and connectors.
 
 ## Preview
 
@@ -39,10 +46,7 @@ Choose **Bloom counties**, select a county, and then choose **Bloom municipaliti
 
 New Jersey (`"nj"`, the default) and Texas (`"tx"`) are included as ready-to-use examples. You can also use your own polygon boundaries with `sf` or GeoJSON.
 
-To show just one transition, use `bloom_map("nj", view = "state_county")`
-or `bloom_map("nj", view = "county_local", county = "bergen")`. See the
-[state-to-county](inst/examples/state-to-county.R) and
-[county-to-municipality](inst/examples/county-to-municipality.R) examples.
+To show just one transition, use `bloom_map("nj", view = "state_county")` or `bloom_map("nj", view = "county_local", county = "bergen")`. See the [state-to-county](inst/examples/state-to-county.R) and [county-to-municipality](inst/examples/county-to-municipality.R) examples.
 
 The bundled boundaries are simplified visualization copies. New Jersey geography is credited to the New Jersey Office of Information Technology, Office of GIS; Texas geography is derived from U.S. Census Bureau 2025 TIGER/Line® county subdivisions. See `inst/COPYRIGHTS` for source notices and limitations.
 
