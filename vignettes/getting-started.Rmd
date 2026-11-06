@@ -46,6 +46,29 @@ blooms county subdivisions, for example
 `bloom_map("tx", view = "county_local", county = "harris")`.
 Both views accept numeric data using the IDs at the level being displayed.
 
+## Bloom chosen areas
+
+Use `bloom_areas` to move only the areas you name. The other areas remain in
+their original positions, keeping the parent map visible. For example, bloom
+only Bergen County from New Jersey:
+
+```{r, eval=FALSE}
+bloom_map("nj", view = "state_county", bloom_areas = "bergen",
+          bloom_color = "#F97316")
+```
+
+Or bloom only North Arlington Borough from Bergen County:
+
+```{r, eval=FALSE}
+bloom_map("nj", view = "county_local", county = "bergen",
+          bloom_areas = "3400352320")
+```
+
+Pass several IDs to bloom several areas. You can use area IDs or GEOIDs.
+`bloom_color` gives moved areas a fixed fill; without it, the normal data colors
+apply. Tooltips, labels, dragging, and display options still work. Omitting
+`bloom_areas` keeps the usual all-areas bloom.
+
 ## Add numeric values
 
 Use a data frame with unique geographic IDs and one numeric measure:
@@ -70,7 +93,7 @@ bloom_map("nj", theme = "dark")
 bloom_map("nj", local_boundaries = FALSE)
 ```
 
-Light mode, dots, dotted connectors, and both types of original boundary lines are on by default. Use **Display** on the map to change lines or labels interactively.
+Light mode, dots, dotted connectors, and both types of original boundary lines are on by default. With `controls = TRUE`, use **Display** on the map to change lines or labels interactively.
 
 ## Where to use it
 

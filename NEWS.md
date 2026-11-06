@@ -13,3 +13,4 @@
 - Explore a linked Shiny dashboard showing Bloom beside ggplot2 and Plotly, with shared county selection.
 - Choose whether local regions bloom from the original geographic location or the expanded parent position (`local_origin`).
 - Use `view = "state_county"` to stop at counties or `view = "county_local"` to start with one county and bloom its municipalities or subdivisions.
+- Choose specific county or local-area IDs with `bloom_areas` while the remaining areas stay in their parent map; use `bloom_color` for a fixed highlight fill.

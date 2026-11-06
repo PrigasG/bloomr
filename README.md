@@ -6,10 +6,7 @@
 
 `bloomr` spreads geographic areas apart so you can explore them without losing their original locations. Dots and dotted lines connect each area to its position on the map. Use it in R, an HTML report, or a Shiny dashboard, with no JavaScript or CSS setup.
 
-If you know [dragmapr](https://CRAN.R-project.org/package=dragmapr) or
-[explodemap](https://CRAN.R-project.org/package=explodemap), those packages
-explore related ways to move geographic areas for display. `bloomr` focuses on
-interactive parent-to-child expansion with visible origin dots and connectors.
+If you know [dragmapr](https://CRAN.R-project.org/package=dragmapr) or [explodemap](https://CRAN.R-project.org/package=explodemap), those packages explore related ways to move geographic areas for display. `bloomr` focuses on interactive parent-to-child expansion with visible origin dots and connectors.
 
 ## Preview
 
@@ -47,6 +44,16 @@ areas. Drag an area to move it, hover to see its name, or use **Back** to return
 New Jersey (`"nj"`, the default) and Texas (`"tx"`) are included as ready-to-use examples. You can also use your own polygon boundaries with `sf` or GeoJSON.
 
 To show just one transition, use `bloom_map("nj", view = "state_county")` or `bloom_map("nj", view = "county_local", county = "bergen")`. See the [state-to-county](https://github.com/PrigasG/bloomr/blob/master/inst/examples/state-to-county.R) and [county-to-municipality](https://github.com/PrigasG/bloomr/blob/master/inst/examples/county-to-municipality.R) examples.
+
+To bloom only Bergen County while the other counties stay in the state map:
+
+``` r
+bloom_map("nj", view = "state_county", bloom_areas = "bergen",
+          bloom_color = "#F97316")
+```
+
+For a single municipality, use `view = "county_local"` and give its GEOID in
+`bloom_areas`. See the [selective bloom examples](https://github.com/PrigasG/bloomr/blob/master/inst/examples/selective-bloom.R).
 
 The bundled boundaries are simplified visualization copies. New Jersey geography is credited to the New Jersey Office of Information Technology, Office of GIS; Texas geography is derived from U.S. Census Bureau 2025 TIGER/Line® county subdivisions. See `inst/COPYRIGHTS` for source notices and limitations.
 
@@ -114,8 +121,8 @@ shiny::runApp(system.file("examples", "coexisting-plots", package = "bloomr"))
 
 ## Customization
 
-The default is just the map, with no surrounding card or full toolbar. It blends
-into a dashboard or report. To show the bordered card and full toolbar:
+The default is just the map, with no surrounding card or full toolbar. To show
+the bordered card and full toolbar:
 
 ``` r
 bloom_map(appearance = "card", controls = TRUE)
@@ -132,6 +139,8 @@ Light mode, tooltips, and smooth animations are on by default. Map labels are hi
 | `theme` | `"light"` | Light, dark, or automatic theme |
 | `appearance` | `"seamless"` | Map only or bordered card |
 | `controls` | `FALSE` | Direct mouse and keyboard navigation or full toolbar |
+| `bloom_areas` | `NULL` | IDs or GEOIDs to move; all areas when omitted |
+| `bloom_color` | `NULL` | Fixed fill color for the moved areas |
 | `labels` | `"none"` | No labels, selected area, chosen areas, or non-overlapping labels |
 | `dots` | `TRUE` | Show original locations |
 | `connectors` | `TRUE` | Link expanded areas to their origins |
@@ -181,6 +190,7 @@ Use `tooltip_data` to supply a separate table instead. See [Using your own data]
 - [Two maps in Shiny](https://github.com/PrigasG/bloomr/blob/master/inst/examples/two-maps.R): use independent maps on the same page.
 - [Seamless Shiny map](https://github.com/PrigasG/bloomr/blob/master/inst/examples/seamless-dashboard.R): embed the default map in a dashboard.
 - [Bloom with ggplot2 and Plotly](https://github.com/PrigasG/bloomr/blob/master/inst/examples/coexisting-plots/app.R): show three views of the same data and highlight the selected county.
+- [Selective bloom](https://github.com/PrigasG/bloomr/blob/master/inst/examples/selective-bloom.R): move only chosen counties or local areas.
 - [Custom geography example](https://github.com/PrigasG/bloomr/blob/master/inst/examples/custom-geography.R): create a small custom map.
 
 To open the included Shiny app:

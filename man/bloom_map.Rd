@@ -11,6 +11,8 @@ bloom_map(
   value = NULL,
   view = c("full", "state_county", "county_local"),
   county = NULL,
+  bloom_areas = NULL,
+  bloom_color = NULL,
   theme = c("light", "dark", "auto"),
   preset = c("dashboard", "viewer", "studio"),
   appearance = c("seamless", "card"),
@@ -50,6 +52,14 @@ or `"county_local"` to start at one county and bloom its local areas.}
 
 \item{county}{County ID or GEOID for `view = "county_local"`, such as
 `"bergen"` or `"34003"`. This view uses the bundled NJ or TX geography.}
+
+\item{bloom_areas}{Optional character vector of area IDs or GEOIDs to move.
+In the full or state-to-county view these identify counties; in the
+county-to-local view they identify municipalities or subdivisions. Other
+areas remain in place on the parent map. `NULL` (default) blooms all areas.}
+
+\item{bloom_color}{Optional hexadecimal fill color, such as `"#F97316"`, for
+areas chosen to bloom. Other areas retain their usual data or default colors.}
 
 \item{theme}{One of `"light"` (default), `"dark"`, or `"auto"`.}
 
@@ -127,5 +137,6 @@ indicator data. Works in R, Shiny, and HTML reports.
 \examples{
 bloom_map("nj")
 bloom_map("nj", labels = "custom", label_areas = c("bergen", "essex"))
+bloom_map("nj", view = "state_county", bloom_areas = "bergen")
 bloom_map("tx", theme = "dark")
 }

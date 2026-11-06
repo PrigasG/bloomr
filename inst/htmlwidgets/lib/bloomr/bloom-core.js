@@ -270,6 +270,9 @@
       this.config = Object.assign({ geography: "nj", theme: "light", preset: "dashboard", appearance: "seamless", controls: false, dots: true, connectors: true,
         overviewBoundaries: true, localBoundaries: true, localOrigin: "original", labels: "none", labelAreas: [],
         draggable: true, duration: 470 }, config || {});
+      if (this.config.bloomAreas != null && !Array.isArray(this.config.bloomAreas)) {
+        this.config.bloomAreas = [this.config.bloomAreas];
+      }
       this.config.labels = ["none", "selected", "all", "custom"].includes(this.config.labels) ? this.config.labels : "none";
       this.config.localOrigin = this.config.localOrigin === "expanded" ? "expanded" : "original";
       // Geographic IDs are kept as strings, including leading zeros.
@@ -535,9 +538,12 @@
       f.__centroid = info.center;
       f.__bounds = info.bounds;
       f.__level = level;
+      f.__bloom = level !== "county" || this.config.bloomAreas == null ||
+        this.config.bloomAreas.includes(f.__id) || this.config.bloomAreas.includes(f.__geoid);
       return f;
     }
     _color(f, level, index) {
+      if (level === "county" && f.__bloom && this.config.bloomColor) return this.config.bloomColor;
       const key = this.values.has(f.__geoid) ? f.__geoid : f.__id;
       const matchesLevel = (level === "county" ? this.counties : this.locals).some(item => this.values.has(item.__geoid) || this.values.has(item.__id));
       if (matchesLevel) {
@@ -552,25 +558,27 @@
       return hexMix("#8FB8E8", "#2D9C9D", index / Math.max(1, this.counties.length - 1));
     }
     _offset(f) {
+      if (f.__bloom === false) return { x: 0, y: 0 };
       const base = f.__level === "local" ? f.__baseMunicipalityOffset : f.__baseCountyOffset;
       const manual = f.__level === "local" ? this.manualLocal.get(f.__id) : this.manualCounty.get(f.__id);
       return add(base, manual);
     }
     _renderNode(f, progress) {
-      const o = this._offset(f), dx = o.x * progress, dy = o.y * progress;
+      const movedProgress = f.__bloom === false ? 0 : progress;
+      const o = this._offset(f), dx = o.x * movedProgress, dy = o.y * movedProgress;
       f.pathEl.setAttribute("transform", `translate(${dx},${dy})`);
       f.pathEl.setAttribute("opacity", progress <= 0 ? 0 : 1);
       f.pathEl.setAttribute("pointer-events", progress > .85 ? "all" : "none");
       if (f.trail) {
         const sx = f.__centroid[0], sy = f.__centroid[1];
         f.trail.setAttribute("d", curvedTrail(sx, sy, sx + dx, sy + dy));
-        f.trail.setAttribute("opacity", this.config.connectors && progress > 0 ? .75 : 0);
+        f.trail.setAttribute("opacity", this.config.connectors && movedProgress > 0 ? .75 : 0);
         f.trail.style.display = this.config.connectors ? "" : "none";
       }
       if (f.dot) {
         f.dot.setAttribute("cx", f.__centroid[0]); f.dot.setAttribute("cy", f.__centroid[1]);
         f.dot.setAttribute("r", f.__level === "county" ? "3.1" : "2.5");
-        f.dot.setAttribute("opacity", this.config.dots && progress > 0 ? .85 : 0);
+        f.dot.setAttribute("opacity", this.config.dots && movedProgress > 0 ? .85 : 0);
         f.dot.style.display = this.config.dots ? "" : "none";
       }
       if (f.labelEl) {
@@ -959,7 +967,7 @@
       }
     }
     _attachDrag(f, level) {
-      if (!this.config.draggable) return;
+      if (!this.config.draggable || f.__bloom === false) return;
       f.pathEl.addEventListener("pointerdown", e => {
         if (this.busy || (level === "county" && !this.countyExpanded) || (level === "local" && !this.localExpanded)) return;
         if (e.button !== 0) return;

@@ -10,6 +10,12 @@
 #'   or `"county_local"` to start at one county and bloom its local areas.
 #' @param county County ID or GEOID for `view = "county_local"`, such as
 #'   `"bergen"` or `"34003"`. This view uses the bundled NJ or TX geography.
+#' @param bloom_areas Optional character vector of area IDs or GEOIDs to move.
+#'   In the full or state-to-county view these identify counties; in the
+#'   county-to-local view they identify municipalities or subdivisions. Other
+#'   areas remain in place on the parent map. `NULL` (default) blooms all areas.
+#' @param bloom_color Optional hexadecimal fill color, such as `"#F97316"`, for
+#'   areas chosen to bloom. Other areas retain their usual data or default colors.
 #' @param data Optional data frame with geographic identifiers and measured values. For an `sf` input, a value column may also be read from `geography`.
 #' @param key Name of the identifier column, such as `"geoid"`.
 #' @param value Name of the numeric indicator column. Optional when `data` is `NULL`.
@@ -60,10 +66,12 @@
 #' @examples
 #' bloom_map("nj")
 #' bloom_map("nj", labels = "custom", label_areas = c("bergen", "essex"))
+#' bloom_map("nj", view = "state_county", bloom_areas = "bergen")
 #' bloom_map("tx", theme = "dark")
 #' @export
 bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL,
                       view = c("full", "state_county", "county_local"), county = NULL,
+                      bloom_areas = NULL, bloom_color = NULL,
                       theme = c("light", "dark", "auto"),
                       preset = c("dashboard", "viewer", "studio"),
                       appearance = c("seamless", "card"), controls = FALSE,
@@ -88,6 +96,15 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
   }
   if (view != "county_local" && !is.null(county)) {
     stop("`county` is only used with `view = 'county_local'`.", call. = FALSE)
+  }
+  if (!is.null(bloom_areas) && (!is.character(bloom_areas) || !length(bloom_areas) ||
+      anyNA(bloom_areas) || any(!nzchar(trimws(bloom_areas))))) {
+    stop("`bloom_areas` must be a nonempty character vector of area IDs or GEOIDs.", call. = FALSE)
+  }
+  if (!is.null(bloom_areas)) bloom_areas <- unique(trimws(bloom_areas))
+  if (!is.null(bloom_color) && (!is.character(bloom_color) || length(bloom_color) != 1L ||
+      is.na(bloom_color) || !grepl("^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$", bloom_color))) {
+    stop("`bloom_color` must be a hexadecimal color such as '#F97316'.", call. = FALSE)
   }
   custom_attributes <- if (inherits(geography, "sf")) sf::st_drop_geometry(geography) else NULL
   custom <- inherits(geography, "sf") ||
@@ -181,6 +198,18 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
     prepared <- focused$geometry
     view_meta <- focused$meta
   }
+  if (!is.null(bloom_areas)) {
+    allowed_bloom <- if (view == "county_local" || geography == "custom") {
+      .bloom_feature_ids(prepared$counties)
+    } else {
+      index <- jsonlite::read_json(system.file("extdata", "area-ids.json", package = "bloomr"), simplifyVector = TRUE)[[geography]]
+      names(index)[index == "overview"]
+    }
+    unknown <- bloom_areas[!bloom_areas %in% allowed_bloom]
+    if (length(unknown)) {
+      stop("`bloom_areas` not found in this view: ", paste(unknown, collapse = ", "), call. = FALSE)
+    }
+  }
   htmlwidgets::createWidget(
     name = "bloom_map",
     x = list(geography = geography,
@@ -188,6 +217,7 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
              dots = dots, connectors = connectors,
              overviewBoundaries = overview_boundaries, localBoundaries = local_boundaries,
              localOrigin = local_origin, labels = labels, labelAreas = as.character(label_areas),
+             bloomAreas = if (is.null(bloom_areas)) NULL else as.list(bloom_areas), bloomColor = bloom_color,
              draggable = draggable, duration = as.numeric(duration),
              data = rows, tooltipRows = tooltip_rows, inlineGeometry = prepared,
              maxLevel = if (view == "full") "local" else "county",
@@ -196,6 +226,13 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
              valueSuffix = value_suffix),
     width = width, height = height, package = "bloomr"
   )
+}
+
+.bloom_feature_ids <- function(raw) {
+  features <- jsonlite::fromJSON(raw, simplifyVector = FALSE)$features
+  unique(unlist(lapply(features, function(f) {
+    c(f$properties$id, f$properties$geoid)
+  }), use.names = FALSE))
 }
 
 .bloom_county_geometry <- function(geography, county) {
