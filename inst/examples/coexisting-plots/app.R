@@ -1,6 +1,5 @@
 # Use bloomr alongside ggplot2 and Plotly in a Shiny dashboard.
-# Install the optional chart packages once:
-# install.packages(c("ggplot2", "plotly"))
+# This optional example also needs ggplot2 and plotly installed.
 
 for (pkg in c("ggplot2", "plotly")) {
   if (!requireNamespace(pkg, quietly = TRUE)) {

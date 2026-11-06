@@ -49,8 +49,6 @@ def run_case(browser, state, theme):
        const after = map._offset(f);
        if (first.x!==after.x || first.y!==after.y) throw Error('Data update reset offset');
     }''')
-    path = root.parent / f'bloom_{state}_{theme}_preview.png'
-    page.screenshot(path=str(path))
     page.get_by_role('button',name='Return to parent geography').click()
     assert page.locator('.bloomr-local').count() == 0
     print(f'{state} / {theme}: county bloom, local bloom, connectors, selection, data update, back PASS')

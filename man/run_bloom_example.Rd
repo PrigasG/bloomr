@@ -6,6 +6,9 @@
 \usage{
 run_bloom_example()
 }
+\value{
+The value of [shiny::runApp()] after the app closes, normally `NULL`.
+}
 \description{
 Run the bundled Shiny integration example
 }

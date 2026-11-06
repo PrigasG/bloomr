@@ -31,9 +31,8 @@ with sync_playwright() as p:
     page.wait_for_function('Bloomr.instances.get("map").locals.length === 70')
     with page.expect_download() as task:
         page.get_by_role('button', name='Export visible map as SVG').click()
-    output = root.parent/'bloom_export_test.svg'
-    task.value.save_as(str(output))
-    contents = output.read_text()
+    # Playwright owns this temporary download and removes it with the browser.
+    contents = Path(task.value.path()).read_text()
     assert contents.startswith('<svg')
     assert 'stroke-dasharray' in contents and 'stroke-width' in contents
     assert 'bloomr-origin-dot' in contents and 'bloomr-local-connector' in contents

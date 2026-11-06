@@ -195,10 +195,9 @@ bloom_map("nj", view = "state_county", bloom_areas = "bergen",
 
 `bloom_scale = 1` is the default. Values up to `1.6` enlarge each moved county or local area around its own center; the layout makes room for them. With many areas, use a taller widget or a smaller scale if the result feels crowded. Origin dots and connectors still point to each area's original position.
 
-To compare the **default size with a visibly larger bloom**, run the complete Shiny dashboard. It places the standard map beside a map starting at `bloom_scale = 1.6` and `bloom_spread = 1.35`, with sliders to change the second map while it is open:
+To compare the **default size with a visibly larger bloom**, run the complete Shiny dashboard after installing the optional `ggplot2` and `plotly` packages. It places the standard map beside a map starting at `bloom_scale = 1.6` and `bloom_spread = 1.35`, with sliders to change the second map while it is open:
 
 ``` r
-install.packages(c("ggplot2", "plotly"))  # Only for this example
 shiny::runApp(system.file("examples", "linked-dashboard", package = "bloomr"))
 ```
 

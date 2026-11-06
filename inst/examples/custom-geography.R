@@ -1,5 +1,5 @@
 # Explore a spatial file using the same bloomr defaults.
-# Install sf once: install.packages("sf")
+# This optional example needs sf installed.
 library(bloomr)
 
 file <- system.file("extdata", "demo-service-areas.geojson", package = "bloomr")

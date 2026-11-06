@@ -11,6 +11,9 @@ bloom_select(proxy, id)
 
 \item{id}{Geographic identifier, such as `"bergen"` or `"34003"`.}
 }
+\value{
+Invisibly returns `proxy` after sending the selection command.
+}
 \description{
 Select a geography without resetting its layout
 }

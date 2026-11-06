@@ -1,6 +1,6 @@
 # bloomr + ggplot2 + Plotly: 2020 county population explorer
 # Run with: shiny::runApp(system.file("examples", "linked-dashboard", package = "bloomr"))
-# Optional packages for this example: install.packages(c("ggplot2", "plotly"))
+# This optional example also needs ggplot2 and plotly installed.
 
 for (pkg in c("ggplot2", "plotly")) {
   if (!requireNamespace(pkg, quietly = TRUE)) {

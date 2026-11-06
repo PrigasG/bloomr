@@ -9,6 +9,9 @@ bloom_reset(proxy)
 \arguments{
 \item{proxy}{Result of `bloomProxy()`.}
 }
+\value{
+Invisibly returns `proxy` after sending the reset command.
+}
 \description{
 Return a Bloom map to its initial state
 }

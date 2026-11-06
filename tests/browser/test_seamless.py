@@ -72,7 +72,6 @@ with sync_playwright() as pw:
     assert page.evaluate('Bloomr.instances.get("seamless").camera.k')>1
     # Optional card remains independent of map-only navigation.
     assert page.evaluate('Bloomr.instances.get("card").countyExpanded') is False
-    page.screenshot(path=str(root.parent/'bloomr_seamless_preview.png'))
     assert errors==[],errors
     print('PASS: default map-only styling, click and keyboard bloom, origin guides, local view, Back, Ctrl+wheel, optional card')
     browser.close()

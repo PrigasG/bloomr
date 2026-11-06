@@ -11,6 +11,9 @@ bloom_expand(proxy, level = c("county", "local"))
 
 \item{level}{`"county"` or `"local"`.}
 }
+\value{
+Invisibly returns `proxy` after sending the expansion command.
+}
 \description{
 Expand the state or the selected county
 }

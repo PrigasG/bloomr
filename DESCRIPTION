@@ -1,30 +1,36 @@
 Package: bloomr
 Title: Interactive Hierarchical Geographic Bloom Maps
 Version: 0.1.0
-Authors@R: person("George", "Arthur", , "prigasgenthian48@gmail.com", role = c("aut", "cre"),
+Authors@R:
+    person("George", "Arthur", , "prigasgenthian48@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1975-1459"))
-Description: Creates interactive maps that spread geographic areas apart while
-    preserving their original locations with dots and dotted connector lines.
-    Includes prepared New Jersey and Texas examples and accepts custom polygon
-    boundaries through an optional sf interface. Supports numeric indicators,
-    selection, dragging, and reactive Shiny updates. Light styling is the default,
-    with optional dark mode and a portable mode for standalone HTML reports.
+Description: Creates interactive maps that spread geographic areas apart
+    while preserving their original locations with dots and dotted
+    connector lines.  Includes prepared New Jersey and Texas examples and
+    accepts custom polygon boundaries through an optional 'sf' interface.
+    Supports numeric indicators, selection, dragging, and reactive 'Shiny'
+    updates. Light styling is the default, with optional dark mode and a
+    portable mode for standalone 'HTML' reports.
 License: MIT + file LICENSE
-Encoding: UTF-8
-Depends: R (>= 4.1.0)
+URL: https://prigasg.github.io/bloomr/, https://github.com/PrigasG/bloomr
+BugReports: https://github.com/PrigasG/bloomr/issues
+Depends:
+    R (>= 4.1.0)
 Imports:
     htmlwidgets (>= 1.6.0),
     jsonlite (>= 1.8.0),
     shiny (>= 1.7.0)
 Suggests:
-    testthat (>= 3.0.0),
-    knitr,
-    rmarkdown,
     bslib,
-    sf
-VignetteBuilder: knitr
-Config/testthat/edition: 3
-RoxygenNote: 7.3.3
-URL: https://prigasg.github.io/bloomr/, https://github.com/PrigasG/bloomr
-BugReports: https://github.com/PrigasG/bloomr/issues
+    ggplot2,
+    knitr,
+    plotly,
+    rmarkdown,
+    sf,
+    testthat (>= 3.0.0)
+VignetteBuilder:
+    knitr
 Config/Needs/website: pkgdown
+Config/testthat/edition: 3
+Encoding: UTF-8
+RoxygenNote: 7.3.3

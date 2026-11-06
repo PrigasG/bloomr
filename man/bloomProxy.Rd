@@ -11,6 +11,9 @@ bloomProxy(outputId, session = shiny::getDefaultReactiveDomain())
 
 \item{session}{A Shiny session; defaults to the current reactive domain.}
 }
+\value{
+A `bloomr_proxy` object containing the map output ID and Shiny session.
+}
 \description{
 Create a command proxy for an existing map
 }

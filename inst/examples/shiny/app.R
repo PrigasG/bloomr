@@ -18,8 +18,8 @@ ui <- fluidPage(
   fluidRow(
     column(3,
       selectInput("measure", "Indicator", c("Population" = "population", "Density" = "density")),
-      helpText("Select a county to see its details. Choose Display on the map to change labels or boundary lines."),
-      verbatimTextOutput("selected")
+      helpText("Click the map to bloom counties, then select one to see its name."),
+      textOutput("selected")
     ),
     column(9, bloomOutput("map", height = "550px"))
   )
@@ -31,9 +31,10 @@ server <- function(input, output, session) {
   observeEvent(input$measure, {
     bloom_update_data(bloomProxy("map"), county_data, key = "geoid", value = input$measure)
   }, ignoreInit = TRUE)
-  output$selected <- renderPrint({
-    req(input$map_selected)
-    input$map_selected
+  output$selected <- renderText({
+    selection <- input$map_selected
+    if (is.null(selection)) return("No location selected yet.")
+    paste0("Selected: ", selection$name, " (", selection$level, ")")
   })
 }
 shinyApp(ui, server)

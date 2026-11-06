@@ -20,6 +20,7 @@ renderBloom <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' Create a command proxy for an existing map
 #' @param outputId Map output ID.
 #' @param session A Shiny session; defaults to the current reactive domain.
+#' @return A `bloomr_proxy` object containing the map output ID and Shiny session.
 #' @export
 bloomProxy <- function(outputId, session = shiny::getDefaultReactiveDomain()) {
   if (is.null(session)) stop("No Shiny session available.", call. = FALSE)
@@ -35,12 +36,14 @@ bloomProxy <- function(outputId, session = shiny::getDefaultReactiveDomain()) {
 #' Select a geography without resetting its layout
 #' @param proxy Result of `bloomProxy()`.
 #' @param id Geographic identifier, such as `"bergen"` or `"34003"`.
+#' @return Invisibly returns `proxy` after sending the selection command.
 #' @export
 bloom_select <- function(proxy, id) .bloom_command(proxy, "select", list(id = as.character(id)))
 
 #' Expand the state or the selected county
 #' @param proxy Result of `bloomProxy()`.
 #' @param level `"county"` or `"local"`.
+#' @return Invisibly returns `proxy` after sending the expansion command.
 #' @export
 bloom_expand <- function(proxy, level = c("county", "local")) {
   .bloom_command(proxy, "expand", list(level = match.arg(level)))
@@ -59,6 +62,7 @@ bloom_expand <- function(proxy, level = c("county", "local")) {
 #'   `NULL`). Useful when switching the indicator in a running dashboard.
 #' @param value_suffix Optional new unit suffix, such as `"%"` or
 #'   `" people/mi2"`; `NULL` preserves the current suffix.
+#' @return Invisibly returns `proxy` after sending the updated data.
 #' @export
 bloom_update_data <- function(proxy, data, key = "geoid", value,
                               tooltip_fields = NULL, tooltip_data = NULL,
@@ -128,10 +132,12 @@ bloom_update_bloom <- function(proxy, bloom_scale = NULL, bloom_spread = NULL) {
 
 #' Return a Bloom map to its initial state
 #' @param proxy Result of `bloomProxy()`.
+#' @return Invisibly returns `proxy` after sending the reset command.
 #' @export
 bloom_reset <- function(proxy) .bloom_command(proxy, "reset")
 
 #' Run the bundled Shiny integration example
+#' @return The value of [shiny::runApp()] after the app closes, normally `NULL`.
 #' @export
 run_bloom_example <- function() {
   shiny::runApp(system.file("examples", "shiny", package = "bloomr"))

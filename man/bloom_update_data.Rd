@@ -35,6 +35,9 @@ its identifier column. Existing tooltip details are preserved when
 \item{value_suffix}{Optional new unit suffix, such as `"%"` or
 `" people/mi2"`; `NULL` preserves the current suffix.}
 }
+\value{
+Invisibly returns `proxy` after sending the updated data.
+}
 \description{
 Update map values without rebuilding geography or resetting positions
 }

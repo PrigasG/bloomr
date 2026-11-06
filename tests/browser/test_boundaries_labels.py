@@ -31,7 +31,6 @@ with sync_playwright() as playwright:
     assert page.locator('.bloomr-area-label').count() == 21
     assert page.evaluate('getComputedStyle(document.querySelector(".bloomr-reference-layer")).display') != 'none'
     assert page.evaluate("() => Bloomr.instances.get('map').counties.every(f => f.labelEl.style.display === 'none')")
-    page.screenshot(path=str(root.parent / 'bloom_overview_boundaries.png'))
 
     page.get_by_role('button', name='Map display options').click()
     assert page.get_by_label('Overview: county lines').is_checked()
@@ -49,7 +48,6 @@ with sync_playwright() as playwright:
       return m.counties.filter(f=>f.labelEl.style.display !== 'none').map(f=>f.__id);
     }''') == ['bergen']
     assert page.locator('.bloomr-connector[opacity="0.75"]').count() == 21
-    page.screenshot(path=str(root.parent / 'bloom_chosen_county_label.png'))
     # Shift+click is a simple way for viewers to choose other labels, without selection reset.
     page.evaluate('''() => {
       const f=Bloomr.instances.get('map').counties.find(f=>f.__id==='essex');

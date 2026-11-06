@@ -26,7 +26,6 @@ with sync_playwright() as p:
   during=page.evaluate('''() => {const m=Bloomr.instances.get('map');return {busy:m.busy,shift:m.localBaseShift,localTransform:m.localShapeLayer.getAttribute('transform'),countyOpacity:m.selected.pathEl.style.opacity}}''')
   assert during['busy'] and during['localTransform'] and 0.12 < float(during['countyOpacity']) < 1, during
   page.wait_for_function('!Bloomr.instances.get("map").busy && Bloomr.instances.get("map").localExpanded')
-  page.locator('#map').screenshot(path=str(root.parent/'bloom_local_from_expanded.png'))
   page.evaluate('Bloomr.instances.get("map").back()')
   page.wait_for_timeout(260)
   returning=page.evaluate('''() => {const m=Bloomr.instances.get('map');return {busy:m.busy,localTransform:m.localShapeLayer.getAttribute('transform'),localOpacity:m.locals[0].pathEl.style.opacity,countyOpacity:m.selected.pathEl.style.opacity}}''')
@@ -37,7 +36,6 @@ with sync_playwright() as p:
   page.wait_for_function('!Bloomr.instances.get("map").busy && Bloomr.instances.get("map").localExpanded')
   original=page.evaluate('''() => {const m=Bloomr.instances.get('map');return {transform:m.localShapeLayer.getAttribute('transform'),shift:m.localBaseShift}}''')
   assert original['transform']=='' and original['shift']=={'x':0,'y':0},original
-  page.locator('#map').screenshot(path=str(root.parent/'bloom_local_from_original.png'))
   assert not errors,errors
   print('Animated expanded-parent bloom and return PASS')
   print('Switch back to original location on next bloom PASS')
