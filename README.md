@@ -201,7 +201,9 @@ To compare the **default size with a visibly larger bloom**, run the complete Sh
 shiny::runApp(system.file("examples", "linked-dashboard", package = "bloomr"))
 ```
 
-![Same counties at the default and increased Bloom sizes](man/figures/bloom-size-comparison.png)
+![Animated comparison: the adjusted New Jersey map blooms and its county shapes change size beside the standard map](man/figures/bloomr-preview.gif)
+
+[View the still comparison](https://github.com/PrigasG/bloomr/blob/master/man/figures/bloom-size-comparison.png).
 
 The dashboard also links county selections to ggplot2 bars and an interactive Plotly scatterplot. `bloom_update_bloom()` lets Shiny update size and spacing **without rebuilding the map**; the first map stays at the original settings for comparison.
 
