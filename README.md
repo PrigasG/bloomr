@@ -16,20 +16,20 @@
 
 After the CRAN release, install with:
 
-```r
+``` r
 install.packages("bloomr")
 ```
 
 To try the development version from [GitHub](https://github.com/PrigasG/bloomr):
 
-```r
+``` r
 install.packages("remotes")
 remotes::install_github("PrigasG/bloomr")
 ```
 
 ## Quick start
 
-```r
+``` r
 library(bloomr)
 
 bloom_map()
@@ -39,10 +39,12 @@ Choose **Bloom counties**, select a county, and then choose **Bloom municipaliti
 
 New Jersey (`"nj"`, the default) and Texas (`"tx"`) are included as ready-to-use examples. You can also use your own polygon boundaries with `sf` or GeoJSON.
 
-The bundled boundaries are simplified visualization copies. New Jersey geography
-is credited to the New Jersey Office of Information Technology, Office of GIS;
-Texas geography is derived from U.S. Census Bureau 2025 TIGER/Line® county
-subdivisions. See `inst/COPYRIGHTS` for source notices and limitations.
+To show just one transition, use `bloom_map("nj", view = "state_county")`
+or `bloom_map("nj", view = "county_local", county = "bergen")`. See the
+[state-to-county](inst/examples/state-to-county.R) and
+[county-to-municipality](inst/examples/county-to-municipality.R) examples.
+
+The bundled boundaries are simplified visualization copies. New Jersey geography is credited to the New Jersey Office of Information Technology, Office of GIS; Texas geography is derived from U.S. Census Bureau 2025 TIGER/Line® county subdivisions. See `inst/COPYRIGHTS` for source notices and limitations.
 
 ## Main features
 
@@ -54,7 +56,7 @@ Origin dots, dotted connectors, and the original boundary lines are visible by d
 
 Provide a data frame with geographic IDs and a numeric column:
 
-```r
+``` r
 rates <- data.frame(
   geoid = c("34003", "34013", "34021"),
   rate = c(12.5, 18.2, 9.3)
@@ -69,14 +71,14 @@ Keep geographic IDs as text so leading zeros are preserved. Check IDs before dra
 
 Supply an `sf` object with a parent region, a unique area ID, and a name:
 
-```r
+``` r
 # districts is an sf polygon object with these columns
 bloom_map(districts, parent = "region", id = "area_id", label = "area_name")
 ```
 
 GeoJSON files with the same columns also work. Try the sample spatial file included in the package:
 
-```r
+``` r
 areas <- system.file("extdata", "demo-service-areas.geojson", package = "bloomr")
 bloom_map(areas, parent = "district", id = "area_id", label = "area_name")
 ```
@@ -85,7 +87,7 @@ bloom_map(areas, parent = "district", id = "area_id", label = "area_name")
 
 ### Add a map to Shiny
 
-```r
+``` r
 library(shiny)
 library(bloomr)
 
@@ -106,7 +108,7 @@ Bloom also works beside `ggplot2` and Plotly. [Try the example dashboard](inst/e
 
 For a map that blends into an existing dashboard, remove the surrounding card and toolbar:
 
-```r
+``` r
 bloom_map(appearance = "seamless", controls = FALSE)
 ```
 
@@ -115,7 +117,7 @@ Click the map to bloom, click a region to select it, and double-click a region o
 Light mode, tooltips, and smooth animations are on by default. Map labels are hidden to keep crowded areas easy to explore. Tooltips show the area's name and indicator, with optional extra fields.
 
 | Option | Default | Purpose |
-| --- | --- | --- |
+|----|----|----|
 | `theme` | `"light"` | Light, dark, or automatic theme |
 | `appearance` | `"card"` | Card or seamless map |
 | `controls` | `TRUE` | Full toolbar or compact navigation |
@@ -135,7 +137,7 @@ Light mode, tooltips, and smooth animations are on by default. Map labels are hi
 
 To expand smaller areas from the parent's *expanded* position, instead of its original location:
 
-```r
+``` r
 bloom_map(local_origin = "expanded")
 ```
 
@@ -143,20 +145,19 @@ The **Display** menu also has **Bloom from expanded parent**. This keeps the par
 
 For example, show only two county labels while leaving hover tooltips available everywhere:
 
-```r
+``` r
 bloom_map(labels = "custom", label_areas = c("bergen", "essex"))
 ```
 
 To add details on hover, choose columns from your data. Only selected columns appear:
 
-```r
+``` r
 rates$note <- c("Bergen", "Essex", "Mercer")
 bloom_map(data = rates, value = "rate",
           tooltip_fields = c("Notes" = "note"))
 ```
 
-Use `tooltip_data` to supply a separate table instead. See [Using your own data](vignettes/using-your-own-data.Rmd).
-Use the **Display** menu to change labels or boundary lines while exploring the map.
+Use `tooltip_data` to supply a separate table instead. See [Using your own data](vignettes/using-your-own-data.Rmd). Use the **Display** menu to change labels or boundary lines while exploring the map.
 
 ## More examples
 
@@ -173,14 +174,14 @@ Use the **Display** menu to change labels or boundary lines while exploring the 
 
 To open the included Shiny app:
 
-```r
+``` r
 run_bloom_example()
 ```
 
 ## Troubleshooting
 
 | Issue | What to check |
-| --- | --- |
+|----|----|
 | Values do not appear | Check IDs with `bloom_check_data(rates, value = "rate", geography = "nj")`. |
 | IDs have lost leading zeros | Read the ID column as character, not numeric. |
 | Labels overlap or feel crowded | Keep `labels = "none"` or use `"custom"` to label selected locations. Tooltips still work. |

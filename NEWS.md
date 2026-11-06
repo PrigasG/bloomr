@@ -12,3 +12,4 @@
 - Choose a seamless, toolbar-free map for embedding in existing dashboards without changing the standard card view.
 - Explore a linked Shiny dashboard showing Bloom beside ggplot2 and Plotly, with shared county selection.
 - Choose whether local regions bloom from the original geographic location or the expanded parent position (`local_origin`).
+- Use `view = "state_county"` to stop at counties or `view = "county_local"` to start with one county and bloom its municipalities or subdivisions.

@@ -6,6 +6,10 @@
 #' indicator data. Works in R, Shiny, and HTML reports.
 #'
 #' @param geography `"nj"`, `"tx"`, an `sf` polygon object, or a path to a GeoJSON file. For custom boundaries, set `parent` and `id`.
+#' @param view `"full"` (default), `"state_county"` to stop after counties,
+#'   or `"county_local"` to start at one county and bloom its local areas.
+#' @param county County ID or GEOID for `view = "county_local"`, such as
+#'   `"bergen"` or `"34003"`. This view uses the bundled NJ or TX geography.
 #' @param data Optional data frame with geographic identifiers and measured values. For an `sf` input, a value column may also be read from `geography`.
 #' @param key Name of the identifier column, such as `"geoid"`.
 #' @param value Name of the numeric indicator column. Optional when `data` is `NULL`.
@@ -58,6 +62,7 @@
 #' bloom_map("tx", theme = "dark")
 #' @export
 bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL,
+                      view = c("full", "state_county", "county_local"), county = NULL,
                       theme = c("light", "dark", "auto"),
                       preset = c("dashboard", "viewer", "studio"),
                       appearance = c("card", "seamless"), controls = TRUE,
@@ -75,11 +80,20 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
   }
   # Validate fields even if no data is available, so mistakes are visible.
   .bloom_tooltip_field_spec(tooltip_fields)
+  view <- match.arg(view)
+  if (view == "county_local" && (is.null(county) || !is.character(county) ||
+      length(county) != 1L || is.na(county) || !nzchar(trimws(county)))) {
+    stop("Set `county` to one county ID or GEOID for `view = 'county_local'`.", call. = FALSE)
+  }
+  if (view != "county_local" && !is.null(county)) {
+    stop("`county` is only used with `view = 'county_local'`.", call. = FALSE)
+  }
   custom_attributes <- if (inherits(geography, "sf")) sf::st_drop_geometry(geography) else NULL
   custom <- inherits(geography, "sf") ||
     (is.character(geography) && length(geography) == 1L &&
        !is.na(geography) && grepl("\\.geojson$", geography, ignore.case = TRUE))
   if (custom) {
+    if (view == "county_local") stop("`county_local` requires bundled NJ or TX geography.", call. = FALSE)
     if (is.character(geography) && is.null(data) &&
         (!is.null(value) || (!is.null(tooltip_fields) && is.null(tooltip_data)))) {
       if (!requireNamespace("sf", quietly = TRUE)) {
@@ -103,7 +117,7 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
     if (length(geography) != 1L || is.na(geography) || !geography %in% c("nj", "tx")) {
       stop("`geography` must be 'nj', 'tx', an sf object, or a GeoJSON file.", call. = FALSE)
     }
-    prepared <- if (isTRUE(portable)) .bloom_builtin_geometry(geography) else NULL
+    prepared <- if (isTRUE(portable) && view != "county_local") .bloom_builtin_geometry(geography) else NULL
   }
   if (!is.logical(portable) || length(portable) != 1L || is.na(portable)) {
     stop("`portable` must be TRUE or FALSE.", call. = FALSE)
@@ -160,6 +174,12 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
       }
     }
   }
+  view_meta <- NULL
+  if (view == "county_local") {
+    focused <- .bloom_county_geometry(geography, county)
+    prepared <- focused$geometry
+    view_meta <- focused$meta
+  }
   htmlwidgets::createWidget(
     name = "bloom_map",
     x = list(geography = geography,
@@ -169,11 +189,31 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
              localOrigin = local_origin, labels = labels, labelAreas = as.character(label_areas),
              draggable = draggable, duration = as.numeric(duration),
              data = rows, tooltipRows = tooltip_rows, inlineGeometry = prepared,
-             customMeta = if (geography == "custom") attr(prepared, "meta") else NULL,
+             maxLevel = if (view == "full") "local" else "county",
+             customMeta = if (!is.null(view_meta)) view_meta else if (geography == "custom") attr(prepared, "meta") else NULL,
              valueLabel = value_label %||b% value %||b% "Indicator value",
              valueSuffix = value_suffix),
     width = width, height = height, package = "bloomr"
   )
+}
+
+.bloom_county_geometry <- function(geography, county) {
+  base <- system.file("htmlwidgets", "lib", "bloomr-geo", "data", package = "bloomr")
+  folder <- if (geography == "tx") file.path(base, "tx") else base
+  counties <- jsonlite::fromJSON(file.path(folder,
+    if (geography == "tx") "counties.geojson" else "nj_counties.geojson"), simplifyVector = FALSE)$features
+  match_id <- function(f) identical(f$properties$id, county) || identical(f$properties$geoid, county)
+  matches <- Filter(match_id, counties)
+  if (length(matches) != 1L) stop("County ID was not found in the bundled map.", call. = FALSE)
+  feature <- matches[[1L]]
+  local_path <- file.path(folder, "municipalities", paste0(feature$properties$id, ".geojson"))
+  if (!file.exists(local_path)) stop("Bundled local geography is missing.", call. = FALSE)
+  read_text <- function(path) paste(readLines(path, warn = FALSE, encoding = "UTF-8"), collapse = "\n")
+  list(geometry = list(state = jsonlite::toJSON(feature, auto_unbox = TRUE, digits = NA),
+                       counties = read_text(local_path), local = list()),
+       meta = list(name = feature$properties$name,
+                   countyLabel = if (geography == "tx") "subdivisions" else "municipalities",
+                   localLabel = "areas", root = "", state = "", counties = ""))
 }
 
 .bloom_rows <- function(data, key, value) {

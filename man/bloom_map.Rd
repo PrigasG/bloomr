@@ -9,6 +9,8 @@ bloom_map(
   data = NULL,
   key = "geoid",
   value = NULL,
+  view = c("full", "state_county", "county_local"),
+  county = NULL,
   theme = c("light", "dark", "auto"),
   preset = c("dashboard", "viewer", "studio"),
   appearance = c("card", "seamless"),
@@ -42,6 +44,12 @@ bloom_map(
 \item{key}{Name of the identifier column, such as `"geoid"`.}
 
 \item{value}{Name of the numeric indicator column. Optional when `data` is `NULL`.}
+
+\item{view}{`"full"` (default), `"state_county"` to stop after counties,
+or `"county_local"` to start at one county and bloom its local areas.}
+
+\item{county}{County ID or GEOID for `view = "county_local"`, such as
+`"bergen"` or `"34003"`. This view uses the bundled NJ or TX geography.}
 
 \item{theme}{One of `"light"` (default), `"dark"`, or `"auto"`.}
 

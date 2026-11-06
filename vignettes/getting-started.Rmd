@@ -27,6 +27,25 @@ You can also use the included Texas map:
 bloom_map("tx")
 ```
 
+## Choose the levels to explore
+
+For a state-to-county map that stops at counties, set `view = "state_county"`:
+
+```{r, eval=FALSE}
+bloom_map("nj", view = "state_county")
+```
+
+To start at a county and bloom its municipalities directly, name that county:
+
+```{r, eval=FALSE}
+bloom_map("nj", view = "county_local", county = "bergen")
+```
+
+You can also use the county GEOID (`"34003"`). For Texas, the second view
+blooms county subdivisions, for example
+`bloom_map("tx", view = "county_local", county = "harris")`.
+Both views accept numeric data using the IDs at the level being displayed.
+
 ## Add numeric values
 
 Use a data frame with unique geographic IDs and one numeric measure:

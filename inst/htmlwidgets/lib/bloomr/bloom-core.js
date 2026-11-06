@@ -382,7 +382,9 @@
       this.svg = elem("svg", "bloomr-svg", this.stage);
       this.svg.setAttribute("viewBox", `0 0 ${WIDTH} ${HEIGHT}`);
       this.svg.setAttribute("role", "img");
-      this.svg.setAttribute("aria-label", this.meta.name + ": expand the map into " + this.meta.countyLabel + ", then into " + this.meta.localLabel + ". Original-location dots and dotted connector lines show geographic relationships.");
+      this.svg.setAttribute("aria-label", this.meta.name + ": expand the map into " + this.meta.countyLabel +
+        (this.config.maxLevel === "county" ? "." : ", then into " + this.meta.localLabel + ".") +
+        " Original-location dots and dotted connector lines show geographic relationships.");
       this.svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
       // When the full toolbar is hidden, retain only the buttons needed to
       // navigate on touch screens. Click and keyboard controls still work.
@@ -714,6 +716,7 @@
       this._refreshToolbar();
     }
     async expandLocal() {
+      if (this.config.maxLevel === "county") return;
       if (!this.ready || this.busy || !this.countyExpanded || !this.selected || this.localExpanded) return;
       this.localExpanded = true;
       this.status.textContent = `Loading ${this.selected.__name} ${this.meta.localLabel}...`;
@@ -893,12 +896,12 @@
       if (this.localOriginOption) this.localOriginOption.control.disabled = !!this.localExpanded || !!this.busy;
       this.backButton.hidden = !(this.countyExpanded || this.localExpanded);
       this.bloomButton.hidden = this.countyExpanded;
-      this.localButton.hidden = !(this.countyExpanded && !this.localExpanded && this.selected);
+      this.localButton.hidden = this.config.maxLevel === "county" || !(this.countyExpanded && !this.localExpanded && this.selected);
       for (const button of [this.backButton, this.bloomButton, this.localButton]) button.disabled = !!this.busy;
       if (this.localButton && this.selected) this.localButton.textContent = `Bloom ${this.meta.localLabel}`;
       if (this.minimalNav) {
         const canBack = this.countyExpanded || this.localExpanded;
-        const canExplore = this.countyExpanded && !this.localExpanded && !!this.selected;
+        const canExplore = this.config.maxLevel !== "county" && this.countyExpanded && !this.localExpanded && !!this.selected;
         this.minimalNav.hidden = !!this.config.controls || (!canBack && !canExplore);
         this.minimalBack.hidden = !canBack;
         this.minimalExplore.hidden = !canExplore;
