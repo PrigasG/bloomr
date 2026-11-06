@@ -2,11 +2,11 @@
 # Install the optional chart packages once:
 # install.packages(c("ggplot2", "plotly"))
 
-# for (pkg in c("ggplot2", "plotly")) {
-#   if (!requireNamespace(pkg, quietly = TRUE)) {
-#     stop("Install the optional package '", pkg, "' to run this example.", call. = FALSE)
-#   }
-# }
+for (pkg in c("ggplot2", "plotly")) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    stop("Install the optional package '", pkg, "' to run this example.", call. = FALSE)
+  }
+}
 
 library(shiny)
 library(bloomr)

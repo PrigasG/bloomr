@@ -1,6 +1,4 @@
-# bloomr
-
-<img src="man/figures/logo.png" align="right" width="180" alt="bloomr logo">
+# bloomr <img src="man/figures/logo.png" align="right" width="180" alt="bloomr logo">
 
 **Interactive maps that keep geography in view.**
 
@@ -48,7 +46,7 @@ areas. Drag an area to move it, hover to see its name, or use **Back** to return
 
 New Jersey (`"nj"`, the default) and Texas (`"tx"`) are included as ready-to-use examples. You can also use your own polygon boundaries with `sf` or GeoJSON.
 
-To show just one transition, use `bloom_map("nj", view = "state_county")` or `bloom_map("nj", view = "county_local", county = "bergen")`. See the [state-to-county](inst/examples/state-to-county.R) and [county-to-municipality](inst/examples/county-to-municipality.R) examples.
+To show just one transition, use `bloom_map("nj", view = "state_county")` or `bloom_map("nj", view = "county_local", county = "bergen")`. See the [state-to-county](https://github.com/PrigasG/bloomr/blob/master/inst/examples/state-to-county.R) and [county-to-municipality](https://github.com/PrigasG/bloomr/blob/master/inst/examples/county-to-municipality.R) examples.
 
 The bundled boundaries are simplified visualization copies. New Jersey geography is credited to the New Jersey Office of Information Technology, Office of GIS; Texas geography is derived from U.S. Census Bureau 2025 TIGER/Line® county subdivisions. See `inst/COPYRIGHTS` for source notices and limitations.
 
@@ -89,7 +87,7 @@ areas <- system.file("extdata", "demo-service-areas.geojson", package = "bloomr"
 bloom_map(areas, parent = "district", id = "area_id", label = "area_name")
 ```
 
-[Preview the sample map](man/figures/custom-spatial-file.png). Install `sf` for custom geography; it is not required for the included maps. See [Using your own data](vignettes/using-your-own-data.Rmd).
+[Preview the sample map](https://github.com/PrigasG/bloomr/blob/master/man/figures/custom-spatial-file.png). Install `sf` for custom geography; it is not required for the included maps. See [Using your own data](https://prigasg.github.io/bloomr/articles/using-your-own-data.html).
 
 ### Add a map to Shiny
 
@@ -106,9 +104,13 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-Read `input$map_selected` to connect selections to tables, charts, and other outputs. Use `bloom_update_data()` to update indicators without resetting the map. See [Using Bloom in Shiny](vignettes/using-in-shiny.Rmd).
+Read `input$map_selected` to connect selections to tables, charts, and other outputs. Use `bloom_update_data()` to update indicators without resetting the map. See [Using Bloom in Shiny](https://prigasg.github.io/bloomr/articles/using-in-shiny.html).
 
-Bloom also works beside `ggplot2` and Plotly. [Try the example dashboard](inst/examples/coexisting-plots/app.R) to see one map selection highlight both charts.
+Bloom also works beside `ggplot2` and Plotly. [Try the example dashboard](https://github.com/PrigasG/bloomr/blob/master/inst/examples/coexisting-plots/app.R) to see one map selection highlight both charts. After installing the optional chart packages, run it with:
+
+``` r
+shiny::runApp(system.file("examples", "coexisting-plots", package = "bloomr"))
+```
 
 ## Customization
 
@@ -166,20 +168,20 @@ bloom_map(data = rates, value = "rate",
           tooltip_fields = c("Notes" = "note"))
 ```
 
-Use `tooltip_data` to supply a separate table instead. See [Using your own data](vignettes/using-your-own-data.Rmd). Use the **Display** menu to change labels or boundary lines while exploring the map.
+Use `tooltip_data` to supply a separate table instead. See [Using your own data](https://prigasg.github.io/bloomr/articles/using-your-own-data.html). With `controls = TRUE`, use the **Display** menu to change labels or boundary lines while exploring the map.
 
 ## More examples
 
-- [Getting started](vignettes/getting-started.Rmd): explore a map and add indicator values.
-- [Using your own data](vignettes/using-your-own-data.Rmd): match IDs and use custom boundaries.
-- [Use Bloom in Shiny](vignettes/using-in-shiny.Rmd): link selections and update map values.
-- [Appearance and keyboard](vignettes/appearance-and-keyboard.Rmd): themes, map guides, labels, and shortcuts.
-- [Boundaries and labels](inst/examples/boundaries-and-labels.R): choose what appears on the map.
-- [Local bloom origin](inst/examples/local-bloom-origin.R): start from the original or expanded parent location.
-- [Two maps in Shiny](inst/examples/two-maps.R): use independent maps on the same page.
-- [Seamless Shiny map](inst/examples/seamless-dashboard.R): embed the default map in a dashboard.
-- [Bloom with ggplot2 and Plotly](inst/examples/coexisting-plots/app.R): show three views of the same data and highlight the selected county.
-- [Custom geography example](inst/examples/custom-geography.R): create a small custom map.
+- [Getting started](https://prigasg.github.io/bloomr/articles/getting-started.html): explore a map and add indicator values.
+- [Using your own data](https://prigasg.github.io/bloomr/articles/using-your-own-data.html): match IDs and use custom boundaries.
+- [Use Bloom in Shiny](https://prigasg.github.io/bloomr/articles/using-in-shiny.html): link selections and update map values.
+- [Appearance and keyboard](https://prigasg.github.io/bloomr/articles/appearance-and-keyboard.html): themes, map guides, labels, and shortcuts.
+- [Boundaries and labels](https://github.com/PrigasG/bloomr/blob/master/inst/examples/boundaries-and-labels.R): choose what appears on the map.
+- [Local bloom origin](https://github.com/PrigasG/bloomr/blob/master/inst/examples/local-bloom-origin.R): start from the original or expanded parent location.
+- [Two maps in Shiny](https://github.com/PrigasG/bloomr/blob/master/inst/examples/two-maps.R): use independent maps on the same page.
+- [Seamless Shiny map](https://github.com/PrigasG/bloomr/blob/master/inst/examples/seamless-dashboard.R): embed the default map in a dashboard.
+- [Bloom with ggplot2 and Plotly](https://github.com/PrigasG/bloomr/blob/master/inst/examples/coexisting-plots/app.R): show three views of the same data and highlight the selected county.
+- [Custom geography example](https://github.com/PrigasG/bloomr/blob/master/inst/examples/custom-geography.R): create a small custom map.
 
 To open the included Shiny app:
 
