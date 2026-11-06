@@ -65,6 +65,12 @@
 #' @param draggable Whether expanded regions can be dragged. Default `TRUE`.
 #' @param duration Bloom/unbloom duration in milliseconds, default 470.
 #' @param height,width Widget dimensions. Accepts pixel sizes or percentage-based widths.
+#' @param map_zoom Initial map magnification, from `0.65` to `3.5` (default `1`).
+#'   Values above `1` make the parent map and bloomed areas larger together.
+#'   With `controls = TRUE`, the Fit button returns to this view; viewers can
+#'   also zoom interactively.
+#' @param bloom_spread How far regions separate when they bloom, from `0.5` to
+#'   `1.5` (default `1`). This changes spacing without distorting polygon shapes.
 #' @return An `htmlwidget` suitable for Shiny, Quarto HTML, and R Markdown HTML.
 #' @examples
 #' bloom_map("nj")
@@ -83,6 +89,7 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
                       labels = c("none", "selected", "all", "custom"),
                       label_areas = character(), draggable = TRUE,
                       duration = 470, width = NULL, height = "520px",
+                      map_zoom = 1, bloom_spread = 1,
                       parent = NULL, id = "id", label = "name",
                       value_label = NULL, value_suffix = "", show_legend = TRUE,
                       portable = FALSE,
@@ -161,6 +168,14 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
   if (!is.numeric(duration) || length(duration) != 1L || !is.finite(duration) || duration < 0) {
     stop("`duration` must be one nonnegative number.", call. = FALSE)
   }
+  if (!is.numeric(map_zoom) || length(map_zoom) != 1L || !is.finite(map_zoom) ||
+      map_zoom < 0.65 || map_zoom > 3.5) {
+    stop("`map_zoom` must be one number from 0.65 to 3.5.", call. = FALSE)
+  }
+  if (!is.numeric(bloom_spread) || length(bloom_spread) != 1L || !is.finite(bloom_spread) ||
+      bloom_spread < 0.5 || bloom_spread > 1.5) {
+    stop("`bloom_spread` must be one number from 0.5 to 1.5.", call. = FALSE)
+  }
   flags <- list(controls = controls, dots = dots, connectors = connectors, draggable = draggable,
                 show_legend = show_legend,
                 overview_boundaries = overview_boundaries,
@@ -224,6 +239,7 @@ bloom_map <- function(geography = "nj", data = NULL, key = "geoid", value = NULL
              localOrigin = local_origin, labels = labels, labelAreas = as.character(label_areas),
              bloomAreas = if (is.null(bloom_areas)) NULL else as.list(bloom_areas), bloomColor = bloom_color,
              draggable = draggable, duration = as.numeric(duration),
+             mapZoom = as.numeric(map_zoom), bloomSpread = as.numeric(bloom_spread),
              data = rows, tooltipRows = tooltip_rows, inlineGeometry = prepared,
              maxLevel = if (view == "full") "local" else "county",
              customMeta = if (!is.null(view_meta)) view_meta else if (geography == "custom") attr(prepared, "meta") else NULL,

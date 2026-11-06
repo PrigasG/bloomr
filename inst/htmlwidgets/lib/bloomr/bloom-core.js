@@ -269,7 +269,7 @@
       this.el = el;
       this.config = Object.assign({ geography: "nj", theme: "light", preset: "dashboard", appearance: "seamless", controls: false, dots: true, connectors: true,
         overviewBoundaries: true, localBoundaries: true, localOrigin: "original", labels: "none", labelAreas: [],
-        draggable: true, duration: 470, showLegend: true }, config || {});
+        draggable: true, duration: 470, showLegend: true, mapZoom: 1, bloomSpread: 1 }, config || {});
       if (this.config.bloomAreas != null && !Array.isArray(this.config.bloomAreas)) {
         this.config.bloomAreas = [this.config.bloomAreas];
       }
@@ -331,7 +331,7 @@
       this.localButton = button("Expand selected " + (this.stateId === "custom" ? "region" : "county"), "Bloom " + this.meta.localLabel, () => this.expandLocal());
       button("Zoom in", "+", () => this.zoom(1.3));
       button("Zoom out", "−", () => this.zoom(1 / 1.3));
-      button("Reset map view", "Fit", () => this.setCamera(1, 0, 0));
+      button("Reset map view", "Fit", () => this._resetCamera());
       this.displayButton = button("Map display options", "Display", () => this._toggleDisplay());
       this.displayButton.setAttribute("aria-expanded", "false");
       this.displayButton.setAttribute("aria-controls", this.id + "-display");
@@ -427,6 +427,7 @@
           my - (my - this.camera.y) * next / this.camera.k);
       }, { passive: false });
       this.viewport = elem("g", "bloomr-viewport", this.svg);
+      this._resetCamera();
       this.stateLayer = elem("g", "bloomr-state-layer", this.viewport);
       this.refLayer = elem("g", "bloomr-reference-layer", this.viewport);
       this.lineLayer = elem("g", "bloomr-line-layer", this.viewport);
@@ -472,8 +473,9 @@
         this.stateInfo = geometryInfo(region, this.project);
         this.stateCenter = this.stateInfo.center;
         this.counties = counties.features.slice().sort((a, b) => String(a.properties?.name).localeCompare(String(b.properties?.name))).map(f => this._prepare(f, "county"));
+        const spread = clamp(Number(this.config.bloomSpread) || 1, .5, 1.5);
         computeGeographicExpansion(this.counties, this.stateCenter, {
-          scale: 1 + .67 * .95, radialKick: 34 * .95, gap: 7 + .95 * 2.2,
+          scale: 1 + .67 * .95 * spread, radialKick: 34 * .95 * spread, gap: (7 + .95 * 2.2) * spread,
           iterations: 190, cleanupIterations: 90, attraction: .085,
           maxBearingDrift: .20, offsetProperty: "__baseCountyOffset"
         });
@@ -743,10 +745,11 @@
           ? { ...this._offset(this.selected) } : { x: 0, y: 0 };
         this._positionLocalLayers();
         const countBoost = Math.min(1.35, Math.max(0, (this.locals.length - 15) / 55));
+        const spread = clamp(Number(this.config.bloomSpread) || 1, .5, 1.5);
         computeGeographicExpansion(this.locals, this.selected.__centroid, {
-          scale: 2.25 + .95 * .95 + countBoost,
-          radialKick: 10 + .95 * 7 + countBoost * 5,
-          gap: 4.5 + countBoost * 2.4, iterations: 240, cleanupIterations: 90,
+          scale: 1 + (2.25 + .95 * .95 + countBoost - 1) * spread,
+          radialKick: (10 + .95 * 7 + countBoost * 5) * spread,
+          gap: (4.5 + countBoost * 2.4) * spread, iterations: 240, cleanupIterations: 90,
           attraction: .072, maxBearingDrift: .24, offsetProperty: "__baseMunicipalityOffset"
         });
         this.localRefLayer.replaceChildren(); this.localLineLayer.replaceChildren();
@@ -1020,6 +1023,10 @@
       this.camera = { k, x, y };
       this.viewport?.setAttribute("transform", `translate(${x},${y}) scale(${k})`);
     }
+    _resetCamera() {
+      const k = clamp(Number(this.config.mapZoom) || 1, .65, 3.5);
+      this.setCamera(k, WIDTH * (1 - k) / 2, HEIGHT * (1 - k) / 2);
+    }
     _legendValues() {
       // Match the actual color domain of the currently visible geography.
       const pool = this.localExpanded ? this.locals : this.counties;
@@ -1077,7 +1084,7 @@
       this.focusCounty = null; this.focusLocal = null; this.countyCamera = null;
       this.counties.forEach(f => f.pathEl.classList.remove("bloomr-selected"));
       this._restoreCountyAppearance();
-      this._render(0); this.setCamera(1, 0, 0);
+      this._render(0); this._resetCamera();
       this._updateLegend();
       this._updateLabels();
       this._syncKeyboardFocus();

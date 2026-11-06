@@ -27,6 +27,8 @@ bloom_map(
   duration = 470,
   width = NULL,
   height = "520px",
+  map_zoom = 1,
+  bloom_spread = 1,
   parent = NULL,
   id = "id",
   label = "name",
@@ -98,6 +100,14 @@ focused area to add or remove its label.}
 \item{duration}{Bloom/unbloom duration in milliseconds, default 470.}
 
 \item{height, width}{Widget dimensions. Accepts pixel sizes or percentage-based widths.}
+
+\item{map_zoom}{Initial map magnification, from `0.65` to `3.5` (default `1`).
+Values above `1` make the parent map and bloomed areas larger together.
+With `controls = TRUE`, the Fit button returns to this view; viewers can
+also zoom interactively.}
+
+\item{bloom_spread}{How far regions separate when they bloom, from `0.5` to
+`1.5` (default `1`). This changes spacing without distorting polygon shapes.}
 
 \item{parent}{Column identifying the parent region for each custom polygon. Required for custom geography.}
 

@@ -10,9 +10,9 @@ If you know [dragmapr](https://CRAN.R-project.org/package=dragmapr) or [explodem
 
 ## Preview
 
-![Expanded geographic areas connected to their original locations](man/figures/nj-county-bloom.png)
+![New Jersey counties bloomed with an indicator legend](man/figures/nj-full-bloom-legend.png)
 
-*County bloom using the included New Jersey map. The original boundaries, dots, and dotted connectors remain visible.*
+*County bloom using the included New Jersey map. The original boundaries, dots, dotted connectors, and numeric legend remain visible.*
 
 ## Installation
 
@@ -62,12 +62,16 @@ bloom_map("nj", view = "state_county", bloom_areas = "bergen",
           bloom_color = "#F97316")
 ```
 
+![Bergen County bloomed while the other New Jersey counties stay in place](man/figures/nj-one-county-bloom.png)
+
 Or move only North Arlington Borough while the other municipalities stay in Bergen County:
 
 ``` r
 bloom_map("nj", view = "county_local", county = "bergen",
           bloom_areas = "3400352320", bloom_color = "#F97316")
 ```
+
+![One municipality bloomed while the Bergen County map stays in place](man/figures/bergen-one-municipality-bloom.png)
 
 `bloom_areas` accepts one or several area IDs or GEOIDs. Omit it to bloom every area. `bloom_color` is optional; without it, the usual data or default colors apply. The [selective bloom example](https://github.com/PrigasG/bloomr/blob/master/inst/examples/selective-bloom.R) shows both levels with indicator data.
 
@@ -145,6 +149,17 @@ bloom_map(appearance = "card", controls = TRUE)
 
 With the default, a small **Explore** or **Back** button appears when needed. Use Ctrl+mouse wheel to zoom, or press Escape to return. Normal page scrolling still works.
 
+### Size and spacing
+
+Set `width` and `height` for the widget, `map_zoom` for the starting size of the entire map, and `bloom_spread` for how far areas move apart:
+
+``` r
+bloom_map("nj", width = "100%", height = "650px",
+          map_zoom = 1.15, bloom_spread = 0.9)
+```
+
+With `controls = TRUE`, Fit returns to `map_zoom`; interactive zoom still works. `bloom_spread` changes spacing without stretching geographic shapes: values below `1` make a tighter bloom, and values above `1` spread areas farther apart. High zoom and spread values can crop the outer areas, so adjust them together. In Shiny, size the output container with `bloomOutput("map", height = "650px")`.
+
 Light mode, tooltips, and smooth animations are on by default. Map labels are hidden to keep crowded areas easy to explore. Tooltips show the area's name and indicator, with optional extra fields.
 
 | Option | Default | Purpose |
@@ -155,6 +170,9 @@ Light mode, tooltips, and smooth animations are on by default. Map labels are hi
 | `bloom_areas` | `NULL` | IDs or GEOIDs to move; all areas when omitted |
 | `bloom_color` | `NULL` | Fixed fill color for the moved areas |
 | `show_legend` | `TRUE` | Show the numeric legend when values are available |
+| `width`, `height` | `NULL`, `"520px"` | Widget dimensions in reports and the RStudio Viewer |
+| `map_zoom` | `1` | Starting magnification of the whole map |
+| `bloom_spread` | `1` | Distance between bloomed areas |
 | `labels` | `"none"` | No labels, selected area, chosen areas, or non-overlapping labels |
 | `dots` | `TRUE` | Show original locations |
 | `connectors` | `TRUE` | Link expanded areas to their origins |

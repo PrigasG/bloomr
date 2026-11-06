@@ -93,6 +93,19 @@ test_that("map-only embedding is the default and the full card is optional", {
   expect_error(bloom_map("nj", controls = NA), "TRUE or FALSE")
 })
 
+test_that("map zoom and bloom spacing are configurable", {
+  normal <- bloom_map("nj")
+  expect_identical(normal$x$mapZoom, 1)
+  expect_identical(normal$x$bloomSpread, 1)
+  larger <- bloom_map("nj", width = "100%", height = "650px",
+                      map_zoom = 1.4, bloom_spread = 1.2)
+  expect_identical(larger$x$mapZoom, 1.4)
+  expect_identical(larger$x$bloomSpread, 1.2)
+  expect_error(bloom_map("nj", map_zoom = 0), "map_zoom")
+  expect_error(bloom_map("nj", map_zoom = NA_real_), "map_zoom")
+  expect_error(bloom_map("nj", bloom_spread = 2), "bloom_spread")
+})
+
 
 test_that("local bloom origin is configurable with original as default", {
   standard <- bloom_map("nj")

@@ -30,6 +30,25 @@ double-click it or press Enter again to explore. A small **Explore** or **Back**
 button appears when needed. Ctrl+mouse wheel zooms without blocking normal page
 scrolling. The full toolbar remains available through `controls = TRUE`.
 
+## Size the map and bloom
+
+The output dimensions, starting map magnification, and bloom spacing are
+separate controls:
+
+```{r, eval=FALSE}
+bloom_map("nj", width = "100%", height = "650px",
+          map_zoom = 1.15, bloom_spread = 0.9)
+```
+
+`width` and `height` size the widget in an HTML report or the RStudio Viewer.
+In Shiny, use `bloomOutput("map", height = "650px")` to size its container.
+`map_zoom` enlarges the parent map and bloomed regions together at startup; with
+`controls = TRUE`, Fit returns to that magnification. `bloom_spread` adjusts how far areas
+separate without changing their geographic shapes. The default for both is `1`.
+Values above `1` spread regions farther; large zoom and spread values can crop
+the outer areas, so adjust them together. Viewers can still use Ctrl+mouse wheel
+or the toolbar zoom buttons.
+
 ## Change the theme or animation
 
 ```{r, eval=FALSE}
