@@ -11,3 +11,5 @@
 ^Meta$
 ^glasstabs_closeread$
 ^pkgdown$
+^CRAN-SUBMISSION$
+^cran-comments\.md$
