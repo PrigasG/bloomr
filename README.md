@@ -10,9 +10,21 @@ If you know [dragmapr](https://CRAN.R-project.org/package=dragmapr) or [explodem
 
 ## Preview
 
+### Original card view
+
+![New Jersey counties bloomed in the original card view with a full toolbar](man/figures/nj-county-bloom.png)
+
+*The original bordered card and toolbar are still available. Click Bloom counties to reach the view shown above.*
+
+``` r
+bloom_map("nj", appearance = "card", controls = TRUE)
+```
+
+### Map-only view
+
 ![New Jersey counties bloomed with an indicator legend](man/figures/nj-full-bloom-legend.png)
 
-*County bloom using the included New Jersey map. The original boundaries, dots, dotted connectors, and numeric legend remain visible.*
+*The default map-only presentation. The original boundaries, dots, dotted connectors, and numeric legend remain visible.*
 
 ## Installation
 

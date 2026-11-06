@@ -8,4 +8,5 @@ bloom_map("nj", view = "county_local", county = "bergen", appearance = "seamless
 
 # Bloom only North Arlington Borough; the rest of Bergen County stays in place.
 bloom_map("nj", view = "county_local", county = "bergen",
-          bloom_areas = "3400352320", bloom_color = "#F97316")
+          bloom_areas = "3400352320", bloom_color = "#F97316",
+          appearance = "card", controls = TRUE)
